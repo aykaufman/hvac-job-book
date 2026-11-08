@@ -26,7 +26,7 @@ jobs:
       - name: Copy the app into www
         run: |
           mkdir -p www
-          cp index.html jspdf.umd.min.js manifest.json sw.js icon-192.png icon-512.png icon-maskable-512.png apple-touch-icon.png www/
+          cp index.html jspdf.umd.min.js firebase-app-compat.js firebase-firestore-compat.js firebase-auth-compat.js manifest.json sw.js icon-192.png icon-512.png icon-maskable-512.png apple-touch-icon.png www/
           sed -i "s/__BUILD__/${{ github.run_number }}/" www/index.html
           grep -q 'Number("${{ github.run_number }}")' www/index.html
 

@@ -12,6 +12,8 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <script src="jspdf.umd.min.js"></script>
+<script src="firebase-app-compat.js"></script>
+<script src="firebase-firestore-compat.js"></script>
 <title>HVAC Job Book</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
@@ -286,23 +288,77 @@ const mapUrl = a => "https://www.google.com/maps/dir/?api=1&destination=" + enco
 const DEMO = [{"id": "demo01", "demo": true, "created": 1794170000000, "kind": "heat", "name": "Cohen", "problem": "Steam boiler not firing — no heat", "address": "1012 Beach 9th St, Far Rockaway, NY", "phone": "718-555-0142", "date": 0, "time": "09:00", "worker": "Moshe", "status": "scheduled", "notes": "", "parts": [], "hours": "", "rate": null, "doneOn": null, "paidOn": null, "invNo": ""}, {"id": "demo02", "demo": true, "created": 1794170000001, "kind": "cool", "name": "Gold", "problem": "Mini-split not heating — error light blinking", "address": "415 Central Ave, Cedarhurst, NY", "phone": "516-555-0177", "date": 0, "time": "11:00", "worker": "Yossi", "status": "scheduled", "notes": "", "parts": [], "hours": "", "rate": null, "doneOn": null, "paidOn": null, "invNo": ""}, {"id": "demo03", "demo": true, "created": 1794170000002, "kind": "maint", "name": "Friedman", "problem": "Yearly boiler cleaning + safety check", "address": "88 Irving Pl, Woodmere, NY", "phone": "516-555-0119", "date": 0, "time": "13:00", "worker": "Yossi", "status": "scheduled", "notes": "", "parts": [], "hours": "", "rate": null, "doneOn": null, "paidOn": null, "invNo": ""}, {"id": "demo04", "demo": true, "created": 1794170000003, "kind": "heat", "name": "Rosen", "problem": "Hot water boiler banging, pressure low", "address": "27 Cornaga Ave, Far Rockaway, NY", "phone": "718-555-0163", "date": 0, "time": "15:30", "worker": "Moshe", "status": "scheduled", "notes": "", "parts": [], "hours": "", "rate": null, "doneOn": null, "paidOn": null, "invNo": ""}, {"id": "demo05", "demo": true, "created": 1794170000004, "kind": "heat", "name": "Klein", "problem": "Gas furnace short cycling", "address": "190 Rockaway Ave, Valley Stream, NY", "phone": "516-555-0108", "date": 0, "time": "08:00", "worker": "Moshe", "status": "done", "notes": "", "parts": [{"name": "Flame sensor", "price": "45"}], "hours": "1", "rate": null, "doneOn": 0, "paidOn": null, "invNo": 1007}, {"id": "demo06", "demo": true, "created": 1794170000005, "kind": "maint", "name": "Schwartz", "problem": "Gas furnace tune-up + filter change", "address": "560 Washington Ave, Cedarhurst, NY", "phone": "516-555-0131", "date": 1, "time": "10:00", "worker": "Yossi", "status": "scheduled", "notes": "", "parts": [], "hours": "", "rate": null, "doneOn": null, "paidOn": null, "invNo": ""}, {"id": "demo07", "demo": true, "created": 1794170000006, "kind": "cool", "name": "Berger", "problem": "Mini-split for finished basement — estimate", "address": "301 Broadway, Woodmere, NY", "phone": "516-555-0185", "date": 1, "time": "14:00", "worker": "Moshe", "status": "scheduled", "notes": "", "parts": [], "hours": "", "rate": null, "doneOn": null, "paidOn": null, "invNo": ""}, {"id": "demo08", "demo": true, "created": 1794170000007, "kind": "heat", "name": "Adler", "problem": "Steam radiator valves hissing", "address": "312 Beach 67th St, Arverne, NY", "phone": "718-555-0150", "date": 2, "time": "09:30", "worker": "Yossi", "status": "scheduled", "notes": "", "parts": [], "hours": "", "rate": null, "doneOn": null, "paidOn": null, "invNo": ""}, {"id": "demo09", "demo": true, "created": 1794170000008, "kind": "heat", "name": "Weiss", "problem": "Thermostat not calling for heat", "address": "742 Caffrey Ave, Far Rockaway, NY", "phone": "718-555-0124", "date": null, "time": "", "worker": "", "status": "new", "notes": "", "parts": [], "hours": "", "rate": null, "doneOn": null, "paidOn": null, "invNo": ""}, {"id": "demo10", "demo": true, "created": 1794170000009, "kind": "cool", "name": "Horowitz", "problem": "Quote: replace old central AC condenser before spring", "address": "45 Peninsula Blvd, Woodmere, NY", "phone": "516-555-0196", "date": null, "time": "", "worker": "", "status": "new", "notes": "", "parts": [], "hours": "", "rate": null, "doneOn": null, "paidOn": null, "invNo": ""}, {"id": "demo11", "demo": true, "created": 1794170000010, "kind": "heat", "name": "Levine", "problem": "Replaced boiler low-water cutoff", "address": "1320 Beach 12th St, Far Rockaway, NY", "phone": "718-555-0171", "date": -1, "time": "10:00", "worker": "Moshe", "status": "done", "notes": "", "parts": [], "hours": "", "rate": null, "doneOn": -1, "paidOn": null, "invNo": ""}, {"id": "demo12", "demo": true, "created": 1794170000011, "kind": "maint", "name": "Katz", "problem": "Steam boiler tune-up", "address": "210 Oakland Ave, Cedarhurst, NY", "phone": "516-555-0139", "date": -2, "time": "12:00", "worker": "Yossi", "status": "done", "notes": "", "parts": [], "hours": "", "rate": null, "doneOn": -2, "paidOn": null, "invNo": ""}, {"id": "demo13", "demo": true, "created": 1794170000012, "kind": "heat", "name": "Feldman", "problem": "Replaced gas furnace igniter", "address": "34 Rockaway Ave, Valley Stream, NY", "phone": "516-555-0112", "date": -5, "time": "09:00", "worker": "Moshe", "status": "done", "notes": "", "parts": [{"name": "Hot surface igniter", "price": "85"}], "hours": "1.5", "rate": null, "doneOn": -5, "paidOn": null, "invNo": 1005}, {"id": "demo14", "demo": true, "created": 1794170000013, "kind": "cool", "name": "Stein", "problem": "Central AC capacitor + contactor", "address": "512 Beach 69th St, Arverne, NY", "phone": "718-555-0158", "date": -21, "time": "11:00", "worker": "Yossi", "status": "done", "notes": "", "parts": [{"name": "Dual run capacitor", "price": "45"}, {"name": "Contactor", "price": "35"}], "hours": "2", "rate": null, "doneOn": -21, "paidOn": null, "invNo": 1001}, {"id": "demo15", "demo": true, "created": 1794170000014, "kind": "heat", "name": "Mandel", "problem": "Furnace blower motor replaced", "address": "18 Willow Rd, Woodmere, NY", "phone": "516-555-0144", "date": -16, "time": "13:00", "worker": "Moshe", "status": "done", "notes": "", "parts": [{"name": "Blower motor", "price": "310"}], "hours": "3", "rate": null, "doneOn": -16, "paidOn": null, "invNo": 1002}, {"id": "demo16", "demo": true, "created": 1794170000015, "kind": "maint", "name": "Fischer", "problem": "Fall gas furnace cleaning", "address": "250 Merrick Rd, Valley Stream, NY", "phone": "516-555-0127", "date": -10, "time": "10:00", "worker": "Yossi", "status": "paid", "notes": "", "parts": [], "hours": "1.5", "rate": null, "doneOn": -10, "paidOn": -8, "invNo": 1003}, {"id": "demo17", "demo": true, "created": 1794170000016, "kind": "cool", "name": "Hirsch", "problem": "Mini-split deep cleaning (2 heads)", "address": "1135 Neilson St, Far Rockaway, NY", "phone": "718-555-0189", "date": -7, "time": "15:00", "worker": "Yossi", "status": "paid", "notes": "", "parts": [{"name": "Coil cleaner", "price": "18"}], "hours": "2", "rate": null, "doneOn": -7, "paidOn": -6, "invNo": 1004}, {"id": "demo18", "demo": true, "created": 1794170000017, "kind": "heat", "name": "Brodsky", "problem": "Boiler circulator pump replaced", "address": "95 Cedarhurst Ave, Cedarhurst, NY", "phone": "516-555-0103", "date": -3, "time": "09:00", "worker": "Moshe", "status": "paid", "notes": "", "parts": [{"name": "Circulator pump", "price": "220"}], "hours": "2", "rate": null, "doneOn": -3, "paidOn": -1, "invNo": 1006}];
 /* ---------- data store (online with fallback to this phone) ---------- */
 const DEFAULT_SETTINGS = { business:"", phone:"", email:"", address:"", website:"", license:"", workers:[], rate:95, taxPct:0, nextInv:1001, terms:"receipt", invNote:"Thank you for your business!", quickItems:[] };
+/* ---------- online sync (Google Firebase) ---------- */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCee9VLvemp0ezwh9Df19XkuL56bIX2HAc",
+  authDomain: "hvac-job-book.firebaseapp.com",
+  projectId: "hvac-job-book",
+  storageBucket: "hvac-job-book.firebasestorage.app",
+  messagingSenderId: "101877465707",
+  appId: "1:101877465707:web:a665c0d523c9b681e9a72e"
+};
+const BUSINESS_ID = "allinone";
+function cloudDb(){
+  if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+  const fs = firebase.firestore();
+  try { fs.enablePersistence({synchronizeTabs:true}).catch(()=>{}); } catch(e){}
+  const root = fs.collection("businesses").doc(BUSINESS_ID);
+  return {
+    cloud: true,
+    collection: name => root.collection(name),
+    doc: path => { const [c, d] = path.split("/"); return root.collection(c).doc(d); },
+    batch: () => fs.batch()
+  };
+}
+function localJobsForUpload(){
+  let jobs = {};
+  try { jobs = JSON.parse(localStorage.getItem("hvac.jobs")||"{}"); } catch(e){}
+  if (!Object.keys(jobs).length){
+    const D = n => n==null ? "" : addDays(todayStr(), n);
+    DEMO.forEach(d => { jobs[d.id] = {...d, date:D(d.date), doneOn:D(d.doneOn), paidOn:D(d.paidOn)}; });
+  }
+  return jobs;
+}
+function localSettingsForUpload(){
+  let s = {};
+  try { s = JSON.parse(localStorage.getItem("hvac.settings")||"{}"); } catch(e){}
+  s = {...DEFAULT_SETTINGS, ...s};
+  if (!s.business || s.business === "Demo Heating & Cooling") s = {...s, ...BIZ, workers: s.workers && s.workers.length ? s.workers : ["Moshe","Yossi"], nextInv: Math.max(num(s.nextInv)||0, 1008)};
+  return s;
+}
+async function firstCloudUpload(db){
+  const jobs = localJobsForUpload();
+  try {
+    const b = db.batch();
+    Object.values(jobs).forEach(j => b.set(db.collection("jobs").doc(j.id), JSON.parse(JSON.stringify(j))));
+    await b.commit();
+  } catch(e){ toast("Couldn't upload to the online database"); }
+}
+
 const Store = {
   mode:"loading", db:null, jobs:{}, settings:{...DEFAULT_SETTINGS}, writes:{},
   async init(){
     let db = null;
-    try { if (window.claude && typeof window.claude.use === "function") db = await window.claude.use("db"); } catch(e){ db = null; }
+    if (window.firebase && window.firebase.firestore) { try { db = cloudDb(); } catch(e){ db = null; } }
+    if (!db) { try { if (window.claude && typeof window.claude.use === "function") db = await window.claude.use("db"); } catch(e){ db = null; } }
     if (!db) { this.useLocal(); return; }
     this.db = db; this.mode = "online";
     let firstJobs = false;
     const timer = setTimeout(()=>{ if(!firstJobs) banner("Can't reach your saved jobs yet. Check your signal — it will catch up on its own."); }, 10000);
     db.collection("jobs").onSnapshot(snap => {
       const j = {}; snap.docs.forEach(d => { j[d.id] = {...d.data(), id:d.id}; });
-      this.jobs = j;
+      if (!snap.metadata.fromCache && snap.empty && !this._uploaded){ this._uploaded = true; firstCloudUpload(db); return; }
+      if (snap.metadata.fromCache && snap.empty && !this._seenServer){ this.jobs = localJobsForUpload(); try { this.settings = {...DEFAULT_SETTINGS, ...localSettingsForUpload()}; } catch(e){} Store.syncState = "offline"; render(); return; }
+      if (!snap.metadata.fromCache) this._seenServer = true;
+      this.jobs = j; this.persistLocal();
       if (!snap.metadata.fromCache){ firstJobs = true; clearTimeout(timer); banner(""); }
+      Store.syncState = snap.metadata.hasPendingWrites ? "pending" : (snap.metadata.fromCache ? "offline" : "synced");
       render();
-    }, err => { clearTimeout(timer); banner("Lost connection to saved jobs. Close and reopen the app."); });
+    }, err => { clearTimeout(timer); banner(err && err.code === "permission-denied" ? "The online database is locked (test period ended). Ask Avi to switch on the login." : "Lost connection to saved jobs. Close and reopen the app."); });
     db.doc("settings/main").onSnapshot(snap => {
-      this.settings = {...DEFAULT_SETTINGS, ...(snap.exists ? snap.data() : {})};
+      if (!snap.metadata.fromCache && !snap.exists && !this._settingsUploaded){ this._settingsUploaded = true; db.doc("settings/main").set(JSON.parse(JSON.stringify(localSettingsForUpload()))).catch(()=>{}); return; }
+      if (!snap.exists) return;
+      this.settings = {...DEFAULT_SETTINGS, ...snap.data()}; this.persistLocal();
       render();
     }, ()=>{});
   },
@@ -910,7 +966,7 @@ function openSettings(){
       <label for="s-note">Note printed on every bill</label><textarea id="s-note" name="invNote">${esc(s.invNote ?? "")}</textarea>
       <div class="btns"><button class="btn accent" type="submit">Save settings</button></div>
       ${isNativeApp()?`<div class="sheet-h">App version</div><div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span><b>Build ${APP_BUILD}</b><br><span class="hint" id="updStatus" style="margin:0">Updates are checked when you open the app.</span></span><button class="btn ghost small" type="button" id="checkNow">Check now</button></div><button class="btn ghost small" type="button" id="updHelp" style="margin-top:8px">Reinstall newest version</button>`:""}
-      <p class="hint">${Store.mode==="online"?"Jobs are saved online, so they're safe if the phone is lost.":"Jobs are saved on this phone only (test version)."}</p>
+      <p class="hint">${Store.mode==="online"?(Store.syncState==="pending"?"Saving online… (will finish when there's signal)":Store.syncState==="offline"?"No signal right now — changes will sync when you're back online.":"Synced online. The website and app show the same jobs."):"Jobs are saved on this phone only."}</p>
       ${demoCount()?`<div class="btns"><button class="btn danger" type="button" id="clearDemo">Remove the ${demoCount()} demo jobs</button></div><p class="hint">Removes only the sample jobs. Anything you added stays.</p>`:""}
     </form>`);
   const cd = $("#clearDemo");
