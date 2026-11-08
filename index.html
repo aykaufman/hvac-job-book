@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#f4f1eb">
+<meta name="theme-color" content="#f6f7f9">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -17,10 +17,10 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
 <style>
   :root{
-    --bg:#f4f1eb; --card:#fff; --ink:#1d2430; --muted:#5f6672; --line:#e7e1d6;
-    --heat:#b04c12; --cool:#1f5a96; --maint:#22663f;
-    --accent:#b04c12; --navy:#1f3a5f;
-    --red:#a42828; --amber:#8a5a12; --blue:#2c5282; --green:#22663f;
+    --bg:#f6f7f9; --card:#fff; --ink:#0f172a; --muted:#556070; --line:#e2e8f0;
+    --heat:#d6203f; --cool:#2563eb; --maint:#6d3fd6;
+    --accent:#d6203f; --navy:#2563eb;
+    --red:#b0172f; --amber:#8a5a00; --blue:#1d4fc4; --green:#15803d;
   }
   *{box-sizing:border-box}
   html,body{margin:0;overscroll-behavior-y:none;background:var(--bg);color:var(--ink);font:17px/1.4 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
@@ -32,7 +32,7 @@
   #upd b{display:block;font-size:16px}
   #upd span{font-size:13px;color:#c3cad4;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   #upd a{background:var(--accent);color:#fff;text-decoration:none;font-weight:800;font-size:15px;border-radius:12px;padding:11px 14px;white-space:nowrap}
-  #upd button{background:none;border:0;color:#a3abb8;font-size:18px;width:32px;height:32px}
+  #upd button{background:none;border:0;color:#94a3b8;font-size:18px;width:32px;height:32px}
   #banner{display:none;background:#fff4e5;color:#7a4510;font-size:14px;padding:8px 16px;border-bottom:1px solid #f3d7b5}
   main{padding:env(safe-area-inset-top) 14px 120px;max-width:560px;margin:0 auto}
   .top{display:flex;justify-content:space-between;align-items:center;padding:18px 4px 12px}
@@ -81,13 +81,13 @@
 
   /* white list */
   .list{background:#fff;border-radius:20px;overflow:hidden}
-  .li{display:flex;align-items:center;gap:12px;padding:13px 14px;border:0;border-bottom:1px solid #f0ece4;background:none;width:100%;text-align:left}
+  .li{display:flex;align-items:center;gap:12px;padding:13px 14px;border:0;border-bottom:1px solid #eef1f5;background:none;width:100%;text-align:left}
   .li:last-child{border-bottom:0}
   .num{width:42px;height:42px;flex-shrink:0;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900}
   .li .mid{flex:1;display:flex;flex-direction:column;min-width:0}
   .li .mid b{font-size:16px;font-weight:800}
   .li .mid span{font-size:14px;color:var(--muted)}
-  .chev{width:20px;height:20px;flex-shrink:0;color:#8a919c}
+  .chev{width:20px;height:20px;flex-shrink:0;color:#94a3b8}
   .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
   .tile{background:#fff;border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:2px;border:0;text-align:left}
   .tile.dark{background:var(--ink);color:#fff}
@@ -106,10 +106,10 @@
   .jcard .p{font-size:15px}
   .jcard .s{font-size:14px;color:var(--muted)}
   .pill{font-size:11px;font-weight:800;padding:4px 9px;border-radius:99px;white-space:nowrap;text-transform:uppercase;letter-spacing:.04em}
-  .s-new{background:#e6eefb;color:var(--blue)}
-  .s-scheduled{background:#fdf0dc;color:var(--amber)}
-  .s-done{background:#fde3e3;color:var(--red)}
-  .s-paid{background:#def5e7;color:var(--green)}
+  .s-new{background:#e3ecff;color:var(--blue)}
+  .s-scheduled{background:#fff1d6;color:var(--amber)}
+  .s-done{background:#ffe4e8;color:var(--red)}
+  .s-paid{background:#dcfce7;color:var(--green)}
   .chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px}
   .chip{border:0;background:#fff;border-radius:99px;padding:9px 15px;font-size:15px;font-weight:600;white-space:nowrap}
   .chip.on{background:var(--ink);color:#fff}
@@ -138,7 +138,7 @@
   .btn:active{opacity:.85}
   .btn.accent{background:var(--accent)}
   .btn.green{background:var(--green)}
-  .btn.ghost{background:#fff;color:var(--ink);border:1.5px solid #d9d3c7}
+  .btn.ghost{background:#fff;color:var(--ink);border:1.5px solid #cbd5e1}
   .btn.danger{background:#fff;color:var(--red);border:1.5px solid #f1b5b5}
   .btn.small{width:auto;padding:10px 14px;font-size:15px}
   .btns{display:grid;gap:10px;margin-top:14px}
@@ -146,7 +146,7 @@
 
   /* nav */
   nav.tabs{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));width:calc(100% - 28px);max-width:532px;height:68px;background:var(--ink);border-radius:24px;display:grid;grid-template-columns:repeat(5,1fr);align-items:center;z-index:6;box-shadow:0 10px 28px rgba(0,0,0,.25)}
-  nav.tabs button{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:3px;color:#a3abb8;font-size:11px;font-weight:600;position:relative}
+  nav.tabs button{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:3px;color:#94a3b8;font-size:11px;font-weight:600;position:relative}
   nav.tabs button svg{width:22px;height:22px}
   nav.tabs button.on{color:#fff;font-weight:800}
   nav.tabs .plus{justify-self:center;width:54px;height:54px;border-radius:18px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center}
@@ -155,7 +155,7 @@
 
   /* forms + sheet */
   label{display:block;font-size:14px;font-weight:700;color:var(--muted);margin:12px 2px 5px}
-  input,select,textarea{width:100%;padding:13px;border:1px solid #d6d0c4;border-radius:12px;background:#fff;font-size:17px}
+  input,select,textarea{width:100%;padding:13px;border:1px solid #cbd5e1;border-radius:12px;background:#fff;font-size:17px}
   textarea{min-height:76px;resize:vertical}
   input:focus,select:focus,textarea:focus{outline:2px solid var(--navy);border-color:transparent}
   .kpick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
@@ -178,11 +178,11 @@
   #sheet .panel{position:absolute;left:0;right:0;bottom:0;top:28px;background:var(--bg);border-radius:22px 22px 0 0;display:flex;flex-direction:column;max-width:560px;margin:0 auto}
   #sheet .shead{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
   #sheet .shead h2{margin:0;flex:1;font-size:21px;font-weight:900}
-  #sheet .close{border:0;background:#e7e1d6;border-radius:99px;width:40px;height:40px;font-size:18px}
+  #sheet .close{border:0;background:#e2e8f0;border-radius:99px;width:40px;height:40px;font-size:18px}
   #sheet .body{overflow-y:auto;padding:6px 16px 40px;flex:1}
   #toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:99px;font-size:15px;z-index:30;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90%}
   #toast.on{opacity:1}
-  .seg2{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:#e7e1d6;border-radius:12px;padding:4px;margin-top:12px}
+  .seg2{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:#e2e8f0;border-radius:12px;padding:4px;margin-top:12px}
   .seg2 button{border:0;background:none;border-radius:9px;padding:10px;font-weight:800;font-size:15px;color:var(--muted)}
   .seg2 button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.1)}
   .grid3{display:grid;grid-template-columns:1fr 1.3fr 1.3fr;gap:8px}
@@ -191,38 +191,38 @@
   .ihead{display:flex;align-items:center;gap:8px}
   .ihead input{border:0;padding:8px 4px;font-weight:700;flex:1;min-width:0}
   .itag{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:4px 8px;border-radius:99px;white-space:nowrap}
-  .irm{border:0;background:#f4f1eb;border-radius:10px;width:36px;height:36px;color:var(--red);font-size:16px;flex-shrink:0}
+  .irm{border:0;background:#f6f7f9;border-radius:10px;width:36px;height:36px;color:var(--red);font-size:16px;flex-shrink:0}
   .irow{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;margin-top:6px}
   .irow label{margin:0;font-size:12px}
   .irow input{padding:10px;font-size:16px;margin-top:3px}
   .ltot{font-weight:900;font-size:17px;padding:0 4px 10px;min-width:80px;text-align:right;font-variant-numeric:tabular-nums}
   .qadd{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
-  .qchip{border:1.5px dashed #c9c1b2;background:#fff;border-radius:99px;padding:9px 13px;font-size:14px;font-weight:700;color:var(--ink)}
+  .qchip{border:1.5px dashed #cbd5e1;background:#fff;border-radius:99px;padding:9px 13px;font-size:14px;font-weight:700;color:var(--ink)}
   .qchip b{color:var(--muted);font-weight:700}
   .paper-wrap{margin-top:14px;overflow-x:auto}
-  .paper{background:#fff;border-radius:8px;box-shadow:0 4px 18px rgba(0,0,0,.12);padding:0 18px 22px;font-size:12px;line-height:1.45;color:#1d2430;min-width:320px;position:relative;overflow:hidden}
-  .pbar{height:6px;background:#b04c12;margin:0 -18px 16px}
+  .paper{background:#fff;border-radius:8px;box-shadow:0 4px 18px rgba(0,0,0,.12);padding:0 18px 22px;font-size:12px;line-height:1.45;color:#0f172a;min-width:320px;position:relative;overflow:hidden}
+  .pbar{height:6px;background:#d6203f;margin:0 -18px 16px}
   .phead{display:flex;justify-content:space-between;gap:12px}
   .pbiz{font-size:17px;font-weight:900}
-  .pmut{color:#5f6672}
+  .pmut{color:#556070}
   .pright{text-align:right}
-  .ptitle{font-size:20px;font-weight:900;color:#b04c12;letter-spacing:.02em}
+  .ptitle{font-size:20px;font-weight:900;color:#d6203f;letter-spacing:.02em}
   .pmeta{margin-left:auto;border-collapse:collapse;margin-top:4px}
-  .pmeta td{padding:1px 0 1px 10px;color:#5f6672;white-space:nowrap}
+  .pmeta td{padding:1px 0 1px 10px;color:#556070;white-space:nowrap}
   .phead>div:first-child{min-width:0}
-  .pmeta td+td{color:#1d2430;font-weight:700}
-  .pcols{display:grid;grid-template-columns:1fr 1fr;gap:12px;border-top:1px solid #e7e1d6;margin-top:14px;padding-top:12px}
-  .plab{font-size:10px;font-weight:800;color:#5f6672;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+  .pmeta td+td{color:#0f172a;font-weight:700}
+  .pcols{display:grid;grid-template-columns:1fr 1fr;gap:12px;border-top:1px solid #e2e8f0;margin-top:14px;padding-top:12px}
+  .plab{font-size:10px;font-weight:800;color:#556070;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
   .pitems{width:100%;border-collapse:collapse;margin-top:14px}
-  .pitems th{background:#1d2430;color:#fff;font-size:10px;text-transform:uppercase;letter-spacing:.05em;padding:7px 6px;text-align:right}
+  .pitems th{background:#0f172a;color:#fff;font-size:10px;text-transform:uppercase;letter-spacing:.05em;padding:7px 6px;text-align:right}
   .pitems th:first-child{text-align:left;border-radius:4px 0 0 4px}
   .pitems th:last-child{border-radius:0 4px 4px 0}
-  .pitems td{padding:7px 6px;text-align:right;border-bottom:1px solid #f0ece4;white-space:nowrap}
+  .pitems td{padding:7px 6px;text-align:right;border-bottom:1px solid #eef1f5;white-space:nowrap}
   .pitems td:first-child{text-align:left;white-space:normal}
-  .pitems tr:nth-child(even) td{background:#f8f6f2}
+  .pitems tr:nth-child(even) td{background:#f8fafc}
   .ptot{margin:12px 0 0 auto;max-width:220px}
   .ptot div{display:flex;justify-content:space-between;padding:2px 0}
-  .ptot .big{font-weight:900;font-size:14px;border-top:1px solid #1d2430;margin-top:4px;padding-top:6px}
+  .ptot .big{font-weight:900;font-size:14px;border-top:1px solid #0f172a;margin-top:4px;padding-top:6px}
   .ptot .due{color:#fff;border-radius:6px;padding:8px 10px;margin-top:6px;font-weight:900;font-size:13px}
   .pnote{white-space:pre-wrap}
   .copybox{width:100%;min-height:240px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px}
@@ -270,9 +270,9 @@ const ICON = {
   gear:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>`
 };
 const KIND = {
-  heat:{label:"Heating", color:"#b04c12", map:"#9c430f", road:"#aa4c16"},
-  cool:{label:"Cooling", color:"#1f5a96", map:"#1a4c80", road:"#235a92"},
-  maint:{label:"Maintenance", color:"#22663f", map:"#1c5534", road:"#246a42"}
+  heat:{label:"Heating", color:"#d6203f", map:"#b81a35", road:"#c81d3b"},
+  cool:{label:"Cooling", color:"#2563eb", map:"#1d4ed8", road:"#2a5fe0"},
+  maint:{label:"Maintenance", color:"#6d3fd6", map:"#5b33b8", road:"#6639c7"}
 };
 const kindOf = j => KIND[j.kind] ? j.kind : "heat";
 const defaultKind = () => { const m = new Date().getMonth(); return (m >= 9 || m <= 3) ? "heat" : "cool"; };
@@ -358,6 +358,7 @@ function invoiceTotals(j){
   const paidAmt = j.status === "paid" ? total : Math.min(num(j.deposit), total);
   return {items, sub, discount, taxPct, tax, total, paidAmt, due: Math.max(0, total - paidAmt)};
 }
+const paidFull = (j,t) => j.status === "paid" || (t.total > 0 && t.due === 0);
 const hasInvoice = j => getItems(j).some(it => num(it.price) || (it.desc||"").trim());
 
 /* ---------- state ---------- */
@@ -446,19 +447,19 @@ function viewToday(B){
       <button class="btn accent" ${B.toBook.length?`data-go="schedule"`:`data-go="new"`}>${B.toBook.length?"Book a day":"+ New job"}</button></div>`;
   }
   const todo = [];
-  if (B.needBill.length) todo.push({n:B.needBill.length, t:"Bills to make", s:B.needBill.map(j=>j.name).slice(0,3).join(", ")+" — finished", bg:"#fde3e3", fg:"#a42828", go:"bills"});
-  if (B.toBook.length) todo.push({n:B.toBook.length, t:"Call to book", s:B.toBook.map(j=>j.name).slice(0,3).join(", "), bg:"#e6eefb", fg:"#2c5282", go:"schedule"});
-  if (B.overdue.length) todo.push({n:B.overdue.length, t:"Overdue payment", s:B.overdue.map(j=>`${j.name} — ${daysSince(j.doneOn)} days`).slice(0,2).join(", "), bg:"#fdf0dc", fg:"#8a5a12", go:"bills"});
+  if (B.needBill.length) todo.push({n:B.needBill.length, t:"Bills to make", s:B.needBill.map(j=>j.name).slice(0,3).join(", ")+" — finished", bg:"#ffe4e8", fg:"#b0172f", go:"bills"});
+  if (B.toBook.length) todo.push({n:B.toBook.length, t:"Call to book", s:B.toBook.map(j=>j.name).slice(0,3).join(", "), bg:"#e3ecff", fg:"#1d4fc4", go:"schedule"});
+  if (B.overdue.length) todo.push({n:B.overdue.length, t:"Overdue payment", s:B.overdue.map(j=>`${j.name} — ${daysSince(j.doneOn)} days`).slice(0,2).join(", "), bg:"#fff1d6", fg:"#8a5a00", go:"bills"});
   html += `<h2 class="sec" style="margin-top:${t.length>1?36:22}px">Needs you<span class="cnt">${todo.length?todo.length+" thing"+(todo.length>1?"s":""):""}</span></h2>`;
   html += todo.length ? `<div class="list">${todo.map(x=>`<button class="li" data-go="${x.go}"><span class="num" style="background:${x.bg};color:${x.fg}">${x.n}</span><span class="mid"><b>${x.t}</b><span>${esc(x.s)}</span></span>${CHEV}</button>`).join("")}</div>`
-    : `<div class="list"><div class="li"><span class="num" style="background:#def5e7;color:#22663f">✓</span><span class="mid"><b>All caught up</b><span>No bills or calls waiting.</span></span></div></div>`;
+    : `<div class="list"><div class="li"><span class="num" style="background:#dcfce7;color:#15803d">✓</span><span class="mid"><b>All caught up</b><span>No bills or calls waiting.</span></span></div></div>`;
   html += `<div class="tiles"><button class="tile" data-go="bills"><small>Billed this week</small><b>${money0(B.billedWeek)}</b></button><button class="tile dark" data-go="bills"><small>Owed to you</small><b>${money0(B.owed)}</b></button></div>`;
   return html;
 }
 
 function stackCard(j, label){
   const k = kindOf(j);
-  return `<button class="scard" style="background:${j.status==="done"?"#5f6672":KIND[k].color}" data-open="${j.id}">
+  return `<button class="scard" style="background:${j.status==="done"?"#64748b":KIND[k].color}" data-open="${j.id}">
     <div class="kindrow"><span class="kindlab"><span class="kic">${ICON[k]}</span>${esc(label)}</span><span class="t">${j.time?fmtTime(j.time):""}</span></div>
     <div class="row"><span class="nm">${esc(j.name)}</span>${j.worker?`<span class="tag">${esc(j.worker)}</span>`:""}</div>
     ${j.problem?`<div class="p">${esc(j.problem)}</div>`:""}
@@ -523,7 +524,7 @@ function viewBills(B){
     <h2 class="sec">Waiting for payment<span class="cnt">${unpaid.length||""}</span></h2>
     ${unpaid.length ? unpaid.map(j=>{ const d=daysSince(j.doneOn); return `<div class="card">
       <div style="display:flex;justify-content:space-between;align-items:baseline"><b style="font-size:18px">${esc(j.name)}</b><span class="money" style="font-size:18px">${money(invoiceTotals(j).due)}</span></div>
-      <div class="hint" style="margin:2px 0 0">${j.invNo?"Bill #"+j.invNo+" · ":""}${d===0?"Done today":d+" day"+(d>1?"s":"")+" waiting"}${d>=14?' · <b style="color:#a42828">overdue</b>':""}</div>
+      <div class="hint" style="margin:2px 0 0">${j.invNo?"Bill #"+j.invNo+" · ":""}${d===0?"Done today":d+" day"+(d>1?"s":"")+" waiting"}${d>=14?' · <b style="color:#b0172f">overdue</b>':""}</div>
       <div class="btns two" style="margin-top:10px"><button class="btn ghost small" data-open="${j.id}" data-mode="invoice">View bill</button><button class="btn green small" data-paid="${j.id}">Mark paid</button></div></div>`;}).join("")
       : `<div class="empty">Nobody owes anything right now.</div>`}
     ${paid.length?`<h2 class="sec">Paid</h2><div class="list">${paid.map(j=>`<button class="li" data-open="${j.id}" data-mode="invoice"><span class="mid"><b>${esc(j.name)}</b><span>${j.invNo?"#"+j.invNo+" · ":""}paid ${j.paidOn?fmtDay(j.paidOn):""}</span></span><span class="money">${money(invoiceTotals(j).total)}</span></button>`).join("")}</div>`:""}`;
@@ -594,7 +595,7 @@ function markDone(id){
 
 /* ---------- invoice builder ---------- */
 const TERMS = {receipt:"Due on receipt", net15:"Net 15 days", net30:"Net 30 days"};
-const ITEM_KIND = {labor:{label:"Labor", bg:"#e6eefb", fg:"#2c5282"}, part:{label:"Part", bg:"#fbe6d6", fg:"#8a3a0d"}, service:{label:"Service", bg:"#def5e7", fg:"#22663f"}, other:{label:"Other", bg:"#eceae5", fg:"#4a505a"}};
+const ITEM_KIND = {labor:{label:"Labor", bg:"#e3ecff", fg:"#1d4fc4"}, part:{label:"Part", bg:"#fbe6d6", fg:"#8a3a0d"}, service:{label:"Service", bg:"#dcfce7", fg:"#15803d"}, other:{label:"Other", bg:"#eef1f5", fg:"#475569"}};
 const longDate = s => s ? parseDay(s).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}) : "";
 const fmtQty = q => Number.isInteger(q) ? String(q) : String(+q.toFixed(2));
 function dueLabel(j){
@@ -673,7 +674,7 @@ function openInvoice(id){
       ${t.discount?`<div class="inv-line"><span>Discount</span><span>−${money(t.discount)}</span></div>`:""}
       ${t.taxPct?`<div class="inv-line"><span>Tax ${t.taxPct}%</span><span>${money(t.tax)}</span></div>`:""}
       <div class="inv-total"><span>Total</span><span>${money(t.total)}</span></div>
-      ${t.paidAmt?`<div class="inv-line" style="color:#22663f"><span>Paid</span><span>−${money(t.paidAmt)}</span></div><div class="inv-line" style="color:var(--ink);font-weight:800"><span>Balance due</span><span>${money(t.due)}</span></div>`:""}`;
+      ${t.paidAmt?`<div class="inv-line" style="color:#15803d"><span>Paid</span><span>−${money(t.paidAmt)}</span></div><div class="inv-line" style="color:var(--ink);font-weight:800"><span>Balance due</span><span>${money(t.due)}</span></div>`:""}`;
   };
   const bindCommon = () => {
     const body = $("#sheetBody");
@@ -731,8 +732,8 @@ function invoiceHTML(j){
       ${t.discount?`<div><span>Discount</span><span>−${money(t.discount)}</span></div>`:""}
       ${t.taxPct?`<div><span>Tax (${t.taxPct}%)</span><span>${money(t.tax)}</span></div>`:""}
       <div class="big"><span>Total</span><span>${money(t.total)}</span></div>
-      ${t.paidAmt?`<div style="color:#22663f"><span>Paid</span><span>−${money(t.paidAmt)}</span></div>`:""}
-      <div class="due" style="background:${t.due?"#b04c12":"#22663f"}"><span>${t.due?"Balance due":"Paid in full"}</span><span>${money(t.due)}</span></div>
+      ${t.paidAmt?`<div style="color:#15803d"><span>Paid</span><span>−${money(t.paidAmt)}</span></div>`:""}
+      <div class="due" style="background:${paidFull(j,t)?"#15803d":"#d6203f"}"><span>${paidFull(j,t)?"Paid in full":"Balance due"}</span><span>${money(t.due)}</span></div>
     </div>
     ${j.invNote?`<div class="plab" style="margin-top:18px">Notes</div><div class="pnote">${esc(j.invNote)}</div>`:""}
   </div>`;
@@ -742,7 +743,7 @@ function makePdf(j){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({unit:"pt", format:"letter"});
   const s = Store.settings, t = invoiceTotals(j), W = 612, M = 44;
-  const ink=[29,36,48], mut=[95,102,114], acc=[176,76,18], grn=[34,102,63];
+  const ink=[15,23,42], mut=[85,96,112], acc=[214,32,63], grn=[21,128,61];
   const C = c => doc.setTextColor(c[0],c[1],c[2]);
   const F = (w,sz) => { doc.setFont("helvetica", w); doc.setFontSize(sz); };
   const clean = v => String(v ?? "").replace(/[\u2014\u2013]/g,"-").replace(/\u2212/g,"-");
@@ -755,7 +756,7 @@ function makePdf(j){
   let my = y+20;
   [["Invoice #", j.invNo||""],["Date", longDate(j.invDate)],["Due", dueLabel(j)]].forEach(([k,v]) => { F("normal",10); C(mut); doc.text(k, W-M-120, my); F("bold",10); C(ink); doc.text(clean(v), W-M, my, {align:"right"}); my += 14; });
   y = Math.max(hy, my) + 14;
-  doc.setDrawColor(231,225,214); doc.setLineWidth(1); doc.line(M,y,W-M,y); y += 24;
+  doc.setDrawColor(226,232,240); doc.setLineWidth(1); doc.line(M,y,W-M,y); y += 24;
   F("bold",9); C(mut); doc.text("BILL TO", M, y); doc.text("JOB", W/2+10, y); y += 15;
   F("bold",11); C(ink); doc.text(clean(j.name), M, y);
   F("normal",10);
@@ -774,13 +775,13 @@ function makePdf(j){
     const lines = doc.splitTextToSize(clean(it.desc||""), cx.qty-cx.desc-50);
     const h = Math.max(1, lines.length)*13 + 13;
     if (y + h > 690){ doc.addPage(); y = 60; header(); F("normal",10); }
-    if (i % 2 === 1){ doc.setFillColor(248,246,242); doc.rect(M,y,W-2*M,h,"F"); }
+    if (i % 2 === 1){ doc.setFillColor(248,250,252); doc.rect(M,y,W-2*M,h,"F"); }
     C(ink); lines.forEach((l,k) => doc.text(l, cx.desc, y+17+k*13));
     const q = qtyOf(it);
     doc.text(fmtQty(q), cx.qty, y+17, {align:"right"}); doc.text(money(it.price), cx.price, y+17, {align:"right"}); doc.text(money(q*num(it.price)), cx.amt, y+17, {align:"right"});
     y += h;
   });
-  doc.setDrawColor(231,225,214); doc.line(M,y,W-M,y); y += 22;
+  doc.setDrawColor(226,232,240); doc.line(M,y,W-M,y); y += 22;
   if (y > 620){ doc.addPage(); y = 60; }
   const totTop = y;
   const row = (k,v,bold,col) => { F(bold?"bold":"normal", bold?12:10); C(col||ink); doc.text(k, W-M-180, y); doc.text(v, W-M-12, y, {align:"right"}); y += bold?20:16; };
@@ -789,9 +790,9 @@ function makePdf(j){
   if (t.taxPct) row(`Tax (${t.taxPct}%)`, money(t.tax));
   row("Total", money(t.total), true);
   if (t.paidAmt) row("Paid", "-"+money(t.paidAmt), false, grn);
-  const bc = t.due ? acc : grn;
+  const bc = paidFull(j,t) ? grn : acc;
   doc.setFillColor(bc[0],bc[1],bc[2]); doc.roundedRect(W-M-196, y-6, 196, 34, 6, 6, "F");
-  F("bold",12); doc.setTextColor(255,255,255); doc.text(t.due ? "Balance due" : "Paid in full", W-M-182, y+15); doc.text(money(t.due), W-M-12, y+15, {align:"right"});
+  F("bold",12); doc.setTextColor(255,255,255); doc.text(paidFull(j,t) ? "Paid in full" : "Balance due", W-M-182, y+15); doc.text(money(t.due), W-M-12, y+15, {align:"right"});
   if (j.status === "paid"){ F("bold",38); C(grn); doc.text("PAID", M+30, totTop+50, {angle:12}); if (j.paidOn){ F("normal",10); doc.text("on "+longDate(j.paidOn), M+38, totTop+70, {angle:12}); } }
   let ny = y + 64;
   if (j.invNote){
