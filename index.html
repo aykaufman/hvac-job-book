@@ -225,6 +225,8 @@
   .ptot .big{font-weight:900;font-size:14px;border-top:1px solid #0f172a;margin-top:4px;padding-top:6px}
   .ptot .due{color:#fff;border-radius:6px;padding:8px 10px;margin-top:6px;font-weight:900;font-size:13px}
   .pnote{white-space:pre-wrap}
+  .steps{padding-left:22px;margin:14px 0 0;font-size:17px}
+  .steps li{margin-bottom:12px}
   .copybox{width:100%;min-height:240px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px}
 </style>
 </head>
@@ -893,7 +895,7 @@ function openSettings(){
       <label for="s-quick">Quick prices — one per line, like: Service call | 89</label><textarea id="s-quick" name="quickItems" placeholder="Service call | 89&#10;Furnace tune-up | 129">${esc((s.quickItems||[]).map(q=>`${q.desc} | ${q.price}`).join("\n"))}</textarea>
       <label for="s-note">Note printed on every bill</label><textarea id="s-note" name="invNote">${esc(s.invNote ?? "")}</textarea>
       <div class="btns"><button class="btn accent" type="submit">Save settings</button></div>
-      ${isNativeApp()?`<div class="sheet-h">App version</div><div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span><b>Build ${APP_BUILD}</b><br><span class="hint" id="updStatus" style="margin:0">Updates are checked when you open the app.</span></span><button class="btn ghost small" type="button" id="checkNow">Check now</button></div>`:""}
+      ${isNativeApp()?`<div class="sheet-h">App version</div><div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span><b>Build ${APP_BUILD}</b><br><span class="hint" id="updStatus" style="margin:0">Updates are checked when you open the app.</span></span><button class="btn ghost small" type="button" id="checkNow">Check now</button></div><button class="btn ghost small" type="button" id="updHelp" style="margin-top:8px">Get the newest version</button>`:""}
       <p class="hint">${Store.mode==="online"?"Jobs are saved online, so they're safe if the phone is lost.":"Jobs are saved on this phone only (test version)."}</p>
       ${demoCount()?`<div class="btns"><button class="btn danger" type="button" id="clearDemo">Remove the ${demoCount()} demo jobs</button></div><p class="hint">Removes only the sample jobs. Anything you added stays.</p>`:""}
     </form>`);
@@ -981,8 +983,28 @@ async function checkForUpdate(manual){
   } catch(e){ if (manual && st) st.textContent = "Couldn't check — no signal?"; }
 }
 $("#updX").onclick = () => { try { localStorage.setItem("hvac.skipBuild", $("#updGo").dataset.build || "0"); } catch(e){} $("#upd").classList.remove("on"); };
-$("#updGo").addEventListener("click", () => { setTimeout(()=>{ $("#upd").classList.remove("on"); toast("Downloading — open the file and tap Install"); }, 300); });
-document.addEventListener("click", e => { if (e.target && e.target.id === "checkNow") checkForUpdate(true); });
+async function openExternal(url){
+  const P = window.Capacitor && window.Capacitor.Plugins;
+  try { if (P && P.AppLauncher) { await P.AppLauncher.openUrl({url}); return true; } } catch(e){}
+  try { if (P && P.Browser) { await P.Browser.open({url}); return true; } } catch(e){}
+  try { window.open(url, "_blank"); return true; } catch(e){}
+  location.href = url; return true;
+}
+function showUpdateHelp(){
+  openSheet("Installing the update", `
+    <ol class="steps">
+      <li><b>Chrome downloads the update.</b> If it asks, tap <b>Download</b> (or <b>Download anyway</b>).</li>
+      <li><b>Open it:</b> pull down from the top of the screen and tap <b>JobBook.apk</b> when it finishes.</li>
+      <li>Tap <b>Install</b> (or <b>Update</b>). If Play Protect warns, tap <b>Install anyway</b>.</li>
+    </ol>
+    <div class="card hint" style="margin-top:12px">Can't find it? Open the <b>Files</b> app → <b>Downloads</b> → tap <b>JobBook.apk</b>.<br><br>Or open this link in Chrome yourself:<br><b style="word-break:break-all;color:var(--ink)">${APK_URL}</b></div>
+    <div class="btns"><button class="btn accent" id="updAgain">Download again</button><button class="btn ghost" id="updCopy">Copy the link</button><button class="btn ghost" id="updDone">Done</button></div>`);
+  $("#updAgain").onclick = () => openExternal(APK_URL);
+  $("#updCopy").onclick = async () => { try { await navigator.clipboard.writeText(APK_URL); toast("Link copied — paste it in Chrome"); } catch(e){ toast("Press and hold the link above to copy"); } };
+  $("#updDone").onclick = closeSheet;
+}
+$("#updGo").addEventListener("click", e => { e.preventDefault(); $("#upd").classList.remove("on"); openExternal(APK_URL); showUpdateHelp(); });
+document.addEventListener("click", e => { if (e.target && e.target.id === "checkNow") checkForUpdate(true); if (e.target && e.target.id === "updHelp"){ openExternal(APK_URL); showUpdateHelp(); } });
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") checkForUpdate(false); });
 setTimeout(() => checkForUpdate(false), 1500);
 if ("serviceWorker" in navigator) { window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(()=>{}); }); }

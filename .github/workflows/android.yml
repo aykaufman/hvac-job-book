@@ -31,7 +31,7 @@ jobs:
           grep -q 'Number("${{ github.run_number }}")' www/index.html
 
       - name: Install Capacitor
-        run: npm install @capacitor/core@latest @capacitor/cli@latest @capacitor/android@latest @capacitor/assets@latest @capacitor/share@latest @capacitor/filesystem@latest
+        run: npm install @capacitor/core@latest @capacitor/cli@latest @capacitor/android@latest @capacitor/assets@latest @capacitor/share@latest @capacitor/filesystem@latest @capacitor/app-launcher@latest
 
       - name: Create the Android project
         run: npx cap add android
