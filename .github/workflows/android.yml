@@ -27,6 +27,8 @@ jobs:
         run: |
           mkdir -p www
           cp index.html manifest.json sw.js icon-192.png icon-512.png icon-maskable-512.png apple-touch-icon.png www/
+          sed -i "s/__BUILD__/${{ github.run_number }}/" www/index.html
+          grep -q 'Number("${{ github.run_number }}")' www/index.html
 
       - name: Install Capacitor
         run: npm install @capacitor/core@latest @capacitor/cli@latest @capacitor/android@latest @capacitor/assets@latest
@@ -52,14 +54,25 @@ jobs:
       - name: Name the file
         run: cp android/app/build/outputs/apk/debug/app-debug.apk JobBook.apk
 
+      - name: Write the update note
+        env:
+          MSG: ${{ github.event.head_commit.message }}
+        run: |
+          NOTE=$(printf '%s' "${MSG:-Manual build}" | head -n 1)
+          {
+            echo "Tap **JobBook.apk** below to download, then open it to install."
+            echo
+            echo "What's new: $NOTE"
+            echo
+            echo "build:${{ github.run_number }}"
+          } > release-notes.md
+
       - name: Put it on the download page
         uses: softprops/action-gh-release@v2
         with:
           tag_name: android-latest
-          name: Job Book for Android (latest)
-          body: |
-            Tap **JobBook.apk** below to download, then open it to install.
-            Built from commit ${{ github.sha }}.
+          name: Job Book for Android (build ${{ github.run_number }})
+          body_path: release-notes.md
           files: JobBook.apk
           make_latest: true
           overwrite_files: true
