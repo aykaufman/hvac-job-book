@@ -31,10 +31,15 @@ jobs:
           grep -q 'Number("${{ github.run_number }}")' www/index.html
 
       - name: Install Capacitor
-        run: npm install @capacitor/core@latest @capacitor/cli@latest @capacitor/android@latest @capacitor/assets@latest @capacitor/share@latest @capacitor/filesystem@latest @capacitor/app-launcher@latest
+        run: npm install @capacitor/core@latest @capacitor/cli@latest @capacitor/android@latest @capacitor/assets@latest @capacitor/share@latest @capacitor/filesystem@latest @capacitor/app-launcher@latest @capacitor-community/file-opener@latest
 
       - name: Create the Android project
         run: npx cap add android
+
+      - name: Let the app install its own updates
+        run: |
+          sed -i 's#</manifest>#    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />\n</manifest>#' android/app/src/main/AndroidManifest.xml
+          grep -q REQUEST_INSTALL_PACKAGES android/app/src/main/AndroidManifest.xml
 
       - name: Make app icons and splash screen
         run: npx @capacitor/assets generate --android --iconBackgroundColor '#d6203f' --iconBackgroundColorDark '#d6203f' --splashBackgroundColor '#d6203f' --splashBackgroundColorDark '#d6203f'

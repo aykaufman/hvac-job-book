@@ -225,6 +225,8 @@
   .ptot .big{font-weight:900;font-size:14px;border-top:1px solid #0f172a;margin-top:4px;padding-top:6px}
   .ptot .due{color:#fff;border-radius:6px;padding:8px 10px;margin-top:6px;font-weight:900;font-size:13px}
   .pnote{white-space:pre-wrap}
+  .pbar-out{height:12px;background:#e2e8f0;border-radius:99px;overflow:hidden}
+  .pbar-in{height:100%;width:3%;background:var(--accent);border-radius:99px;transition:width .2s}
   .steps{padding-left:22px;margin:14px 0 0;font-size:17px}
   .steps li{margin-bottom:12px}
   .copybox{width:100%;min-height:240px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px}
@@ -895,7 +897,7 @@ function openSettings(){
       <label for="s-quick">Quick prices — one per line, like: Service call | 89</label><textarea id="s-quick" name="quickItems" placeholder="Service call | 89&#10;Furnace tune-up | 129">${esc((s.quickItems||[]).map(q=>`${q.desc} | ${q.price}`).join("\n"))}</textarea>
       <label for="s-note">Note printed on every bill</label><textarea id="s-note" name="invNote">${esc(s.invNote ?? "")}</textarea>
       <div class="btns"><button class="btn accent" type="submit">Save settings</button></div>
-      ${isNativeApp()?`<div class="sheet-h">App version</div><div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span><b>Build ${APP_BUILD}</b><br><span class="hint" id="updStatus" style="margin:0">Updates are checked when you open the app.</span></span><button class="btn ghost small" type="button" id="checkNow">Check now</button></div><button class="btn ghost small" type="button" id="updHelp" style="margin-top:8px">Get the newest version</button>`:""}
+      ${isNativeApp()?`<div class="sheet-h">App version</div><div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span><b>Build ${APP_BUILD}</b><br><span class="hint" id="updStatus" style="margin:0">Updates are checked when you open the app.</span></span><button class="btn ghost small" type="button" id="checkNow">Check now</button></div><button class="btn ghost small" type="button" id="updHelp" style="margin-top:8px">Reinstall newest version</button>`:""}
       <p class="hint">${Store.mode==="online"?"Jobs are saved online, so they're safe if the phone is lost.":"Jobs are saved on this phone only (test version)."}</p>
       ${demoCount()?`<div class="btns"><button class="btn danger" type="button" id="clearDemo">Remove the ${demoCount()} demo jobs</button></div><p class="hint">Removes only the sample jobs. Anything you added stays.</p>`:""}
     </form>`);
@@ -1003,8 +1005,36 @@ function showUpdateHelp(){
   $("#updCopy").onclick = async () => { try { await navigator.clipboard.writeText(APK_URL); toast("Link copied — paste it in Chrome"); } catch(e){ toast("Press and hold the link above to copy"); } };
   $("#updDone").onclick = closeSheet;
 }
-$("#updGo").addEventListener("click", e => { e.preventDefault(); $("#upd").classList.remove("on"); openExternal(APK_URL); showUpdateHelp(); });
-document.addEventListener("click", e => { if (e.target && e.target.id === "checkNow") checkForUpdate(true); if (e.target && e.target.id === "updHelp"){ openExternal(APK_URL); showUpdateHelp(); } });
+async function installUpdate(){
+  const P = window.Capacitor && window.Capacitor.Plugins;
+  if (!(P && P.Filesystem && P.FileOpener)) { openExternal(APK_URL); showUpdateHelp(); return; }
+  openSheet("Updating Job Book", `
+    <p style="font-size:18px;margin:16px 2px 10px"><b id="updMsg">Downloading the update…</b></p>
+    <div class="pbar-out"><div class="pbar-in" id="updBar"></div></div>
+    <p class="hint" id="updSub">About 5 MB. Keep the app open.</p>
+    <div class="card hint" style="margin-top:14px"><b style="color:var(--ink)">Next:</b> Android shows an install screen — tap <b>Update</b> (or <b>Install</b>). Your jobs stay.<br><br><b style="color:var(--ink)">First time only:</b> if it says it can't install from this source, tap <b>Settings</b>, turn on <b>Allow from this source</b>, go back, and tap <b>Update</b>.</div>
+    <div class="btns"><button class="btn ghost" id="updClose">Close</button></div>`);
+  $("#updClose").onclick = closeSheet;
+  let listener = null;
+  try {
+    try { listener = await P.Filesystem.addListener("progress", ev => { const bar = $("#updBar"); if (bar && ev.contentLength) bar.style.width = Math.min(100, Math.round(ev.bytes/ev.contentLength*100)) + "%"; }); } catch(e){}
+    try { await P.Filesystem.deleteFile({path:"JobBook-update.apk", directory:"CACHE"}); } catch(e){}
+    const res = await P.Filesystem.downloadFile({url: APK_URL + "?t=" + Date.now(), path:"JobBook-update.apk", directory:"CACHE", progress:true});
+    const bar = $("#updBar"); if (bar) bar.style.width = "100%";
+    let path = res && res.path;
+    if (!path) { const u = await P.Filesystem.getUri({path:"JobBook-update.apk", directory:"CACHE"}); path = u.uri; }
+    const m = $("#updMsg"); if (m) m.textContent = "Opening the installer…";
+    const sub = $("#updSub"); if (sub) sub.textContent = "Tap Update on the next screen.";
+    await P.FileOpener.open({filePath: path, contentType: "application/vnd.android.package-archive", openWithDefault: true});
+    if (m) m.textContent = "Tap Update on the install screen";
+  } catch(e){
+    const m = $("#updMsg"); if (m) m.textContent = "Couldn't download the update";
+    const sub = $("#updSub"); if (sub) sub.innerHTML = 'Check your signal and try again. <button class="btn accent small" id="updRetry" style="margin-top:10px">Try again</button>';
+    const r = $("#updRetry"); if (r) r.onclick = installUpdate;
+  } finally { try { listener && listener.remove && listener.remove(); } catch(e){} }
+}
+$("#updGo").addEventListener("click", e => { e.preventDefault(); $("#upd").classList.remove("on"); installUpdate(); });
+document.addEventListener("click", e => { if (e.target && e.target.id === "checkNow") checkForUpdate(true); if (e.target && e.target.id === "updHelp"){ installUpdate(); } });
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") checkForUpdate(false); });
 setTimeout(() => checkForUpdate(false), 1500);
 if ("serviceWorker" in navigator) { window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(()=>{}); }); }
