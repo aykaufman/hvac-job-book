@@ -1,0 +1,6 @@
+{
+  "appId": "com.aykaufman.jobbook",
+  "appName": "Job Book",
+  "webDir": "www",
+  "android": { "backgroundColor": "#f4f1eb" }
+}
