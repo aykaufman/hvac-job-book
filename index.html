@@ -50,36 +50,37 @@
   h1.page{font-size:26px;font-weight:900;letter-spacing:-.01em;margin:18px 4px 12px}
 
   /* hero */
-  .hero{border-radius:26px;overflow:hidden;color:#fff;box-shadow:0 10px 24px rgba(0,0,0,.18)}
+  .hero{border-radius:26px;overflow:hidden;color:var(--ink);background:linear-gradient(150deg,#fff 0%,#fff 45%,var(--t2) 100%);border:1px solid var(--t2);box-shadow:0 8px 22px rgba(15,23,42,.08)}
   .hero svg{display:block;width:100%;height:auto}
   .hero .in{padding:14px 16px 16px;display:flex;flex-direction:column;gap:4px}
   .kindrow{display:flex;justify-content:space-between;align-items:center}
-  .kindlab{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
-  .kic{width:28px;height:28px;border-radius:9px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center}
+  .kindlab{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--d)}
+  .kic{width:28px;height:28px;border-radius:9px;background:var(--c);color:#fff;display:flex;align-items:center;justify-content:center}
   .kic svg{width:16px;height:16px}
-  .hero .time{font-size:22px;font-weight:900}
-  .hero .who{font-size:28px;font-weight:900;letter-spacing:-.01em;margin-top:4px;background:none;border:0;color:#fff;padding:0;text-align:left}
+  .hero .time{font-size:22px;font-weight:900;color:var(--d)}
+  .hero .who{font-size:28px;font-weight:900;letter-spacing:-.01em;margin-top:4px;background:none;border:0;color:var(--ink);padding:0;text-align:left}
   .hero .what{font-size:16px}
   .addr{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:2px}
-  .addr span:first-child{font-size:14px;opacity:.92}
-  .tag{font-size:13px;font-weight:800;background:rgba(255,255,255,.22);border-radius:99px;padding:5px 10px;white-space:nowrap}
+  .addr span:first-child{font-size:14px;color:var(--muted)}
+  .tag{font-size:13px;font-weight:800;background:#fff;color:var(--d);border:1px solid var(--t2);border-radius:99px;padding:4px 10px;white-space:nowrap}
   .acts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
-  .acts a,.acts button{height:50px;border-radius:14px;border:0;background:rgba(255,255,255,.2);color:#fff;font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}
-  .acts .solid{background:#fff}
+  .acts a,.acts button{height:50px;border-radius:14px;border:1.5px solid #e2e8f0;background:#fff;color:var(--ink);font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}
+  .acts .solid{background:var(--c);border-color:var(--c);color:#fff}
   .acts svg{width:18px;height:18px}
   .hero.empty{background:var(--ink);padding:22px 18px}
   .hero.empty .big{font-size:24px;font-weight:900}
   .hero.empty p{margin:6px 0 14px;color:#c3cad4}
 
   /* stacked color cards */
-  .stack{display:flex;flex-direction:column}
-  .scard{display:block;width:100%;text-align:left;border:0;color:#fff;border-radius:22px;padding:14px 16px 30px;margin-bottom:-16px;box-shadow:0 -4px 14px rgba(0,0,0,.12);position:relative}
-  .scard:last-child{margin-bottom:0;padding-bottom:16px}
-  .scard .t{font-size:19px;font-weight:900}
-  .scard .nm{font-size:22px;font-weight:900}
+  .stack{display:flex;flex-direction:column;gap:10px}
+  .scard{display:block;width:100%;text-align:left;color:var(--ink);border-radius:22px;padding:14px 16px 16px;position:relative;background:linear-gradient(120deg,#fff 0%,#fff 52%,var(--t2) 100%);border:1px solid #e8ecf2;box-shadow:0 2px 8px rgba(15,23,42,.05)}
+  .scard.isdone{opacity:.6;background:#fff}
+  .scard .kic{width:30px;height:30px;border-radius:10px}
+  .scard .t{font-size:19px;font-weight:900;color:var(--d)}
+  .scard .nm{font-size:21px;font-weight:900}
   .scard .row{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-top:2px}
   .scard .p{font-size:15px;margin-top:2px}
-  .scard .a{font-size:14px;opacity:.9;margin-top:2px}
+  .scard .a{font-size:14px;color:var(--muted);margin-top:2px}
 
   /* white list */
   .list{background:#fff;border-radius:20px;overflow:hidden}
@@ -276,11 +277,12 @@ const ICON = {
   gear:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>`
 };
 const KIND = {
-  heat:{label:"Heating", color:"#d6203f", map:"#b81a35", road:"#c81d3b"},
-  cool:{label:"AC & Mini-split", color:"#2563eb", map:"#1d4ed8", road:"#2a5fe0"},
-  maint:{label:"Maintenance", color:"#6d3fd6", map:"#5b33b8", road:"#6639c7"}
+  heat:{label:"Heating", color:"#d6203f", map:"#b81a35", road:"#c81d3b", t:"#fde8ec", t2:"#fbd3db", d:"#b0172f"},
+  cool:{label:"AC & Mini-split", color:"#2563eb", map:"#1d4ed8", road:"#2a5fe0", t:"#e6efff", t2:"#d3e2ff", d:"#1d4fc4"},
+  maint:{label:"Maintenance", color:"#6d3fd6", map:"#5b33b8", road:"#6639c7", t:"#f1ebff", t2:"#e2d6fd", d:"#5b33b8"}
 };
 const kindOf = j => KIND[j.kind] ? j.kind : "heat";
+const kvars = k => { const K = KIND[k]; return `--c:${K.color};--t:${K.t};--t2:${K.t2};--d:${K.d}`; };
 const defaultKind = () => { const m = new Date().getMonth(); return (m >= 9 || m <= 3) ? "heat" : "cool"; };
 const telOf = p => (p||"").replace(/[^0-9+]/g,"");
 const mapUrl = a => "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent(a||"");
@@ -479,14 +481,14 @@ function routeSvg(stops, k){
   const pins = P.map(([x,y],i)=>{
     const kk = KIND[kindOf(stops[i]||{})];
     return i===0
-      ? `<circle cx="${x}" cy="${y}" r="14" fill="#fff"/><text x="${x}" y="${y+5}" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" font-weight="900" fill="${K.color}">1</text>`
+      ? `<circle cx="${x}" cy="${y}" r="14" fill="${K.color}"/><text x="${x}" y="${y+5}" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" font-weight="900" fill="#fff">1</text>`
       : `<circle cx="${x}" cy="${y}" r="13" fill="${kk.color}" stroke="#fff" stroke-width="2"/><text x="${x}" y="${y+4}" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" font-weight="800" fill="#fff">${i+1}</text>`;
   }).join("");
   return `<svg viewBox="0 0 362 112" role="img" aria-label="Today's ${stops.length} stop${stops.length>1?"s":""}">
-    <rect width="362" height="112" fill="${K.map}"/>
-    <path d="M0 34 H362 M0 82 H362 M72 0 V112 M184 0 V112 M296 0 V112" stroke="${K.road}" stroke-width="10"/>
-    <path d="M0 10 L118 112 M244 0 L362 62" stroke="${K.road}" stroke-width="5"/>
-    ${P.length>1?`<path d="${d}" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-dasharray="1 9"/>`:""}
+    <rect width="362" height="112" fill="${K.t}"/>
+    <path d="M0 34 H362 M0 82 H362 M72 0 V112 M184 0 V112 M296 0 V112" stroke="#fff" stroke-width="10"/>
+    <path d="M0 10 L118 112 M244 0 L362 62" stroke="#fff" stroke-width="5"/>
+    ${P.length>1?`<path d="${d}" fill="none" stroke="${K.color}" stroke-width="4" stroke-linecap="round" stroke-dasharray="1 9"/>`:""}
     ${pins}</svg>`;
 }
 
@@ -496,7 +498,7 @@ function viewToday(B){
   let html = topBar(sub);
   if (t.length){
     const j = t[0], k = kindOf(j), K = KIND[k], tel = telOf(j.phone);
-    html += `<div class="hero" style="background:${K.color}">${routeSvg(t, k)}
+    html += `<div class="hero" style="${kvars(k)}">${routeSvg(t, k)}
       <div class="in">
         <div class="kindrow"><span class="kindlab"><span class="kic">${ICON[k]}</span>Up next · ${K.label}</span><span class="time">${j.time?fmtTime(j.time):""}</span></div>
         <button class="who" data-open="${j.id}">${esc(j.name)}</button>
@@ -505,7 +507,7 @@ function viewToday(B){
         <div class="acts">
           ${tel?`<a href="tel:${esc(tel)}">${ICON.phone}Call</a>`:`<button data-open="${j.id}">${ICON.phone}Call</button>`}
           ${j.address?`<a href="${mapUrl(j.address)}" target="_blank" rel="noopener">${ICON.go}Go</a>`:`<button data-open="${j.id}">${ICON.go}Go</button>`}
-          <button class="solid" style="color:${K.color}" data-done="${j.id}">Done</button>
+          <button class="solid" data-done="${j.id}">Done</button>
         </div>
       </div></div>`;
     if (t.length > 1){
@@ -530,7 +532,7 @@ function viewToday(B){
 
 function stackCard(j, label){
   const k = kindOf(j);
-  return `<button class="scard" style="background:${j.status==="done"?"#64748b":KIND[k].color}" data-open="${j.id}">
+  return `<button class="scard${j.status==="done"?" isdone":""}" style="${kvars(k)}" data-open="${j.id}">
     <div class="kindrow"><span class="kindlab"><span class="kic">${ICON[k]}</span>${esc(label)}</span><span class="t">${j.time?fmtTime(j.time):""}</span></div>
     <div class="row"><span class="nm">${esc(j.name)}</span>${j.worker?`<span class="tag">${esc(j.worker)}</span>`:""}</div>
     ${j.problem?`<div class="p">${esc(j.problem)}</div>`:""}
