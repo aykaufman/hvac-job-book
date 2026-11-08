@@ -11,6 +11,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
+<script src="jspdf.umd.min.js"></script>
 <title>HVAC Job Book</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
@@ -181,6 +182,49 @@
   #sheet .body{overflow-y:auto;padding:6px 16px 40px;flex:1}
   #toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 18px;border-radius:99px;font-size:15px;z-index:30;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90%}
   #toast.on{opacity:1}
+  .seg2{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:#e7e1d6;border-radius:12px;padding:4px;margin-top:12px}
+  .seg2 button{border:0;background:none;border-radius:9px;padding:10px;font-weight:800;font-size:15px;color:var(--muted)}
+  .seg2 button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+  .grid3{display:grid;grid-template-columns:1fr 1.3fr 1.3fr;gap:8px}
+  .grid3 input,.grid3 select{padding:12px 10px;font-size:16px}
+  .item{background:#fff;border-radius:14px;padding:10px;margin-bottom:8px}
+  .ihead{display:flex;align-items:center;gap:8px}
+  .ihead input{border:0;padding:8px 4px;font-weight:700;flex:1;min-width:0}
+  .itag{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:4px 8px;border-radius:99px;white-space:nowrap}
+  .irm{border:0;background:#f4f1eb;border-radius:10px;width:36px;height:36px;color:var(--red);font-size:16px;flex-shrink:0}
+  .irow{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;margin-top:6px}
+  .irow label{margin:0;font-size:12px}
+  .irow input{padding:10px;font-size:16px;margin-top:3px}
+  .ltot{font-weight:900;font-size:17px;padding:0 4px 10px;min-width:80px;text-align:right;font-variant-numeric:tabular-nums}
+  .qadd{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+  .qchip{border:1.5px dashed #c9c1b2;background:#fff;border-radius:99px;padding:9px 13px;font-size:14px;font-weight:700;color:var(--ink)}
+  .qchip b{color:var(--muted);font-weight:700}
+  .paper-wrap{margin-top:14px;overflow-x:auto}
+  .paper{background:#fff;border-radius:8px;box-shadow:0 4px 18px rgba(0,0,0,.12);padding:0 18px 22px;font-size:12px;line-height:1.45;color:#1d2430;min-width:320px;position:relative;overflow:hidden}
+  .pbar{height:6px;background:#b04c12;margin:0 -18px 16px}
+  .phead{display:flex;justify-content:space-between;gap:12px}
+  .pbiz{font-size:17px;font-weight:900}
+  .pmut{color:#5f6672}
+  .pright{text-align:right}
+  .ptitle{font-size:20px;font-weight:900;color:#b04c12;letter-spacing:.02em}
+  .pmeta{margin-left:auto;border-collapse:collapse;margin-top:4px}
+  .pmeta td{padding:1px 0 1px 10px;color:#5f6672;white-space:nowrap}
+  .phead>div:first-child{min-width:0}
+  .pmeta td+td{color:#1d2430;font-weight:700}
+  .pcols{display:grid;grid-template-columns:1fr 1fr;gap:12px;border-top:1px solid #e7e1d6;margin-top:14px;padding-top:12px}
+  .plab{font-size:10px;font-weight:800;color:#5f6672;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+  .pitems{width:100%;border-collapse:collapse;margin-top:14px}
+  .pitems th{background:#1d2430;color:#fff;font-size:10px;text-transform:uppercase;letter-spacing:.05em;padding:7px 6px;text-align:right}
+  .pitems th:first-child{text-align:left;border-radius:4px 0 0 4px}
+  .pitems th:last-child{border-radius:0 4px 4px 0}
+  .pitems td{padding:7px 6px;text-align:right;border-bottom:1px solid #f0ece4;white-space:nowrap}
+  .pitems td:first-child{text-align:left;white-space:normal}
+  .pitems tr:nth-child(even) td{background:#f8f6f2}
+  .ptot{margin:12px 0 0 auto;max-width:220px}
+  .ptot div{display:flex;justify-content:space-between;padding:2px 0}
+  .ptot .big{font-weight:900;font-size:14px;border-top:1px solid #1d2430;margin-top:4px;padding-top:6px}
+  .ptot .due{color:#fff;border-radius:6px;padding:8px 10px;margin-top:6px;font-weight:900;font-size:13px}
+  .pnote{white-space:pre-wrap}
   .copybox{width:100%;min-height:240px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px}
 </style>
 </head>
@@ -237,7 +281,7 @@ const mapUrl = a => "https://www.google.com/maps/dir/?api=1&destination=" + enco
 
 const DEMO = [{"id": "demo01", "demo": true, "created": 1794170000000, "kind": "heat", "name": "Cohen", "problem": "No heat \u2014 furnace clicking", "address": "12 Main St, Monsey", "phone": "845-555-0142", "date": 0, "time": "09:00", "worker": "Moshe", "status": "scheduled", "notes": "", "parts": [], "hours": "", "rate": null, "doneOn": null, "paidOn": null, "invNo": ""}, {"id": "demo02", "demo": true, "created": 1794170000001, "kind": "cool", "name": "Gold", "problem": "Water leaking from AC unit", "address": "3 Elm Ct, Monsey", "phone": "845-555-0177", "date": 0, "time": "11:00", "worker": "Yossi", "status": "scheduled", "notes": "", "parts": [], "hours": "", "rate": null, "doneOn": null, "paidOn": null, "invNo": ""}, {"id": "demo03", "demo": true, "created": 1794170000002, "kind": "maint", "name": "Friedman", "problem": "Yearly furnace cleaning", "address": "48 Maple Ave, Spring Valley", "phone": "845-555-0119", "date": 0, "time": "13:00", "worker": "Yossi", "status": "scheduled", "notes": "", "parts": [], "hours": "", "rate": null, "doneOn": null, "paidOn": null, "invNo": ""}, {"id": "demo04", "demo": true, "created": 1794170000003, "kind": "heat", "name": "Rosen", "problem": "Boiler making banging noise", "address": "9 Carlton Rd, Monsey", "phone": "845-555-0163", "date": 0, "time": "15:30", "worker": "Moshe", "status": "scheduled", "notes": "", "parts": [], "hours": "", "rate": null, "doneOn": null, "paidOn": null, "invNo": ""}, {"id": "demo05", "demo": true, "created": 1794170000004, "kind": "heat", "name": "Klein", "problem": "Pilot light keeps going out", "address": "27 Highview Rd, Suffern", "phone": "845-555-0108", "date": 0, "time": "08:00", "worker": "Moshe", "status": "done", "notes": "", "parts": [{"name": "Thermocouple", "price": "38"}], "hours": "1", "rate": null, "doneOn": 0, "paidOn": null, "invNo": 1007}, {"id": "demo06", "demo": true, "created": 1794170000005, "kind": "maint", "name": "Schwartz", "problem": "Replace furnace filter + check", "address": "5 Union Rd, Spring Valley", "phone": "845-555-0131", "date": 1, "time": "10:00", "worker": "Yossi", "status": "scheduled", "notes": "", "parts": [], "hours": "", "rate": null, "doneOn": null, "paidOn": null, "invNo": ""}, {"id": "demo07", "demo": true, "created": 1794170000006, "kind": "heat", "name": "Berger", "problem": "Install new thermostat", "address": "61 Saddle River Rd, Airmont", "phone": "845-555-0185", "date": 1, "time": "14:00", "worker": "Moshe", "status": "scheduled", "notes": "", "parts": [], "hours": "", "rate": null, "doneOn": null, "paidOn": null, "invNo": ""}, {"id": "demo08", "demo": true, "created": 1794170000007, "kind": "cool", "name": "Adler", "problem": "Mini-split not cooling (office)", "address": "200 Route 59, Nanuet", "phone": "845-555-0150", "date": 2, "time": "09:30", "worker": "Yossi", "status": "scheduled", "notes": "", "parts": [], "hours": "", "rate": null, "doneOn": null, "paidOn": null, "invNo": ""}, {"id": "demo09", "demo": true, "created": 1794170000008, "kind": "heat", "name": "Weiss", "problem": "Thermostat not responding", "address": "7 Grove St, Monsey", "phone": "845-555-0124", "date": null, "time": "", "worker": "", "status": "new", "notes": "", "parts": [], "hours": "", "rate": null, "doneOn": null, "paidOn": null, "invNo": ""}, {"id": "demo10", "demo": true, "created": 1794170000009, "kind": "maint", "name": "Horowitz", "problem": "Duct cleaning estimate", "address": "14 Fred Hecht Dr, Monsey", "phone": "845-555-0196", "date": null, "time": "", "worker": "", "status": "new", "notes": "", "parts": [], "hours": "", "rate": null, "doneOn": null, "paidOn": null, "invNo": ""}, {"id": "demo11", "demo": true, "created": 1794170000010, "kind": "heat", "name": "Levine", "problem": "Replaced capacitor", "address": "220 Route 59, Airmont", "phone": "845-555-0171", "date": -1, "time": "10:00", "worker": "Moshe", "status": "done", "notes": "", "parts": [], "hours": "", "rate": null, "doneOn": -1, "paidOn": null, "invNo": ""}, {"id": "demo12", "demo": true, "created": 1794170000011, "kind": "maint", "name": "Katz", "problem": "Furnace tune-up", "address": "33 Ewing Ave, Spring Valley", "phone": "845-555-0139", "date": -2, "time": "12:00", "worker": "Yossi", "status": "done", "notes": "", "parts": [], "hours": "", "rate": null, "doneOn": -2, "paidOn": null, "invNo": ""}, {"id": "demo13", "demo": true, "created": 1794170000012, "kind": "heat", "name": "Feldman", "problem": "Replaced igniter", "address": "8 Wilder Rd, Monsey", "phone": "845-555-0112", "date": -5, "time": "09:00", "worker": "Moshe", "status": "done", "notes": "", "parts": [{"name": "Hot surface igniter", "price": "85"}], "hours": "1.5", "rate": null, "doneOn": -5, "paidOn": null, "invNo": 1005}, {"id": "demo14", "demo": true, "created": 1794170000013, "kind": "cool", "name": "Stein", "problem": "AC compressor capacitor + contactor", "address": "19 Concord Dr, Monsey", "phone": "845-555-0158", "date": -21, "time": "11:00", "worker": "Yossi", "status": "done", "notes": "", "parts": [{"name": "Dual capacitor", "price": "45"}, {"name": "Contactor", "price": "35"}], "hours": "2", "rate": null, "doneOn": -21, "paidOn": null, "invNo": 1001}, {"id": "demo15", "demo": true, "created": 1794170000014, "kind": "heat", "name": "Mandel", "problem": "Blower motor replaced", "address": "4 Kennedy Dr, Spring Valley", "phone": "845-555-0144", "date": -16, "time": "13:00", "worker": "Moshe", "status": "done", "notes": "", "parts": [{"name": "Blower motor", "price": "310"}], "hours": "3", "rate": null, "doneOn": -16, "paidOn": null, "invNo": 1002}, {"id": "demo16", "demo": true, "created": 1794170000015, "kind": "maint", "name": "Fischer", "problem": "Fall furnace cleaning", "address": "22 Grandview Ave, Monsey", "phone": "845-555-0127", "date": -10, "time": "10:00", "worker": "Yossi", "status": "paid", "notes": "", "parts": [], "hours": "1.5", "rate": null, "doneOn": -10, "paidOn": -8, "invNo": 1003}, {"id": "demo17", "demo": true, "created": 1794170000016, "kind": "heat", "name": "Hirsch", "problem": "Flame sensor cleaned + replaced", "address": "50 Main St, Monsey", "phone": "845-555-0189", "date": -7, "time": "15:00", "worker": "Moshe", "status": "paid", "notes": "", "parts": [{"name": "Flame sensor", "price": "28"}], "hours": "1", "rate": null, "doneOn": -7, "paidOn": -6, "invNo": 1004}, {"id": "demo18", "demo": true, "created": 1794170000017, "kind": "heat", "name": "Brodsky", "problem": "Gas valve replaced", "address": "11 Old Nyack Tpke, Monsey", "phone": "845-555-0103", "date": -3, "time": "09:00", "worker": "Moshe", "status": "paid", "notes": "", "parts": [{"name": "Gas valve", "price": "165"}], "hours": "2", "rate": null, "doneOn": -3, "paidOn": -1, "invNo": 1006}];
 /* ---------- data store (online with fallback to this phone) ---------- */
-const DEFAULT_SETTINGS = { business:"", phone:"", email:"", workers:[], rate:95, taxPct:0, nextInv:1001 };
+const DEFAULT_SETTINGS = { business:"", phone:"", email:"", address:"", license:"", workers:[], rate:95, taxPct:0, nextInv:1001, terms:"receipt", invNote:"Thank you for your business!", quickItems:[] };
 const Store = {
   mode:"loading", db:null, jobs:{}, settings:{...DEFAULT_SETTINGS}, writes:{},
   async init(){
@@ -289,24 +333,32 @@ function seedDemo(){
   if (Object.keys(Store.jobs).length) return;
   const D = n => n==null ? "" : addDays(todayStr(), n);
   DEMO.forEach(d => { Store.jobs[d.id] = {...d, date:D(d.date), doneOn:D(d.doneOn), paidOn:D(d.paidOn)}; });
-  Store.settings = {...Store.settings, business:"Demo Heating & Cooling", phone:"845-555-0100", workers:["Moshe","Yossi"], rate:95, nextInv:1008};
+  Store.settings = {...Store.settings, business:"Demo Heating & Cooling", phone:"845-555-0100", address:"1 Demo Rd, Monsey, NY", workers:["Moshe","Yossi"], rate:95, nextInv:1008, quickItems:[{desc:"Service call",price:89},{desc:"Furnace tune-up",price:129},{desc:"Filter replacement",price:25}]};
   Store.persistLocal();
   try { localStorage.setItem("hvac.seeded","1"); } catch(e){}
 }
 function banner(msg){ const b=$("#banner"); b.textContent=msg; b.style.display = msg ? "block" : "none"; }
 
 /* ---------- money math ---------- */
-function invoiceTotals(j){
-  const s = Store.settings;
-  const parts = (j.parts||[]).reduce((a,p)=>a+num(p.price),0);
-  const rate = j.rate != null && j.rate !== "" ? num(j.rate) : num(s.rate);
-  const labor = num(j.hours) * rate;
-  const sub = parts + labor;
-  const taxPct = num(s.taxPct);
-  const tax = Math.round(sub * taxPct) / 100;
-  return {parts, labor, rate, sub, tax, taxPct, total: sub + tax};
+const qtyOf = it => (it.qty === "" || it.qty == null) ? 1 : num(it.qty);
+function getItems(j){
+  if (Array.isArray(j.items)) return j.items;
+  const s = Store.settings, items = [];
+  if (num(j.hours) > 0) items.push({kind:"labor", desc:"Labor", qty:String(num(j.hours)), price:String(j.rate != null && j.rate !== "" ? num(j.rate) : num(s.rate))});
+  (j.parts||[]).forEach(p => items.push({kind:"part", desc:p.name||"Part", qty:"1", price:String(p.price ?? "")}));
+  return items;
 }
-const hasInvoice = j => (j.parts && j.parts.length) || num(j.hours) > 0;
+function invoiceTotals(j){
+  const items = getItems(j);
+  const sub = items.reduce((a,it)=>a+qtyOf(it)*num(it.price),0);
+  const discount = Math.min(num(j.discount), sub);
+  const taxPct = (j.taxPct != null && j.taxPct !== "") ? num(j.taxPct) : num(Store.settings.taxPct);
+  const tax = Math.round((sub - discount) * taxPct) / 100;
+  const total = sub - discount + tax;
+  const paidAmt = j.status === "paid" ? total : Math.min(num(j.deposit), total);
+  return {items, sub, discount, taxPct, tax, total, paidAmt, due: Math.max(0, total - paidAmt)};
+}
+const hasInvoice = j => getItems(j).some(it => num(it.price) || (it.desc||"").trim());
 
 /* ---------- state ---------- */
 const UI = { tab:"today", filter:"open", q:"", day: todayStr() };
@@ -321,7 +373,7 @@ function buckets(){
   const unpaid = all.filter(j => j.status==="done" && hasInvoice(j));
   const overdue = unpaid.filter(j => daysSince(j.doneOn) >= 14);
   const toBook = all.filter(j => j.status==="new" && !j.date);
-  const owed = unpaid.reduce((a,j)=>a+invoiceTotals(j).total,0);
+  const owed = unpaid.reduce((a,j)=>a+invoiceTotals(j).due,0);
   const ws = weekStart();
   const billedWeek = all.filter(j => (j.status==="done"||j.status==="paid") && hasInvoice(j) && (j.doneOn||"") >= ws).reduce((a,j)=>a+invoiceTotals(j).total,0);
   const doneToday = all.filter(j => j.date === today && (j.status==="done"||j.status==="paid")).length;
@@ -470,7 +522,7 @@ function viewBills(B){
     ${B.needBill.length?`<h2 class="sec">Make a bill<span class="cnt">${B.needBill.length}</span></h2><div class="list">${B.needBill.map(j=>`<button class="li" data-open="${j.id}" data-mode="invoice"><span class="num" style="background:${KIND[kindOf(j)].color};color:#fff">${ICON[kindOf(j)].replace("<svg","<svg width=\"22\" height=\"22\"")}</span><span class="mid"><b>${esc(j.name)}</b><span>${esc(j.problem||"")} · finished ${j.doneOn?fmtDay(j.doneOn):""}</span></span>${CHEV}</button>`).join("")}</div>`:""}
     <h2 class="sec">Waiting for payment<span class="cnt">${unpaid.length||""}</span></h2>
     ${unpaid.length ? unpaid.map(j=>{ const d=daysSince(j.doneOn); return `<div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:baseline"><b style="font-size:18px">${esc(j.name)}</b><span class="money" style="font-size:18px">${money(invoiceTotals(j).total)}</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><b style="font-size:18px">${esc(j.name)}</b><span class="money" style="font-size:18px">${money(invoiceTotals(j).due)}</span></div>
       <div class="hint" style="margin:2px 0 0">${j.invNo?"Bill #"+j.invNo+" · ":""}${d===0?"Done today":d+" day"+(d>1?"s":"")+" waiting"}${d>=14?' · <b style="color:#a42828">overdue</b>':""}</div>
       <div class="btns two" style="margin-top:10px"><button class="btn ghost small" data-open="${j.id}" data-mode="invoice">View bill</button><button class="btn green small" data-paid="${j.id}">Mark paid</button></div></div>`;}).join("")
       : `<div class="empty">Nobody owes anything right now.</div>`}
@@ -540,72 +592,255 @@ function markDone(id){
   Store.saveJob(j); openInvoice(id);
 }
 
+/* ---------- invoice builder ---------- */
+const TERMS = {receipt:"Due on receipt", net15:"Net 15 days", net30:"Net 30 days"};
+const ITEM_KIND = {labor:{label:"Labor", bg:"#e6eefb", fg:"#2c5282"}, part:{label:"Part", bg:"#fbe6d6", fg:"#8a3a0d"}, service:{label:"Service", bg:"#def5e7", fg:"#22663f"}, other:{label:"Other", bg:"#eceae5", fg:"#4a505a"}};
+const longDate = s => s ? parseDay(s).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}) : "";
+const fmtQty = q => Number.isInteger(q) ? String(q) : String(+q.toFixed(2));
+function dueLabel(j){
+  const d = j.invDate || todayStr();
+  if (j.terms === "net15") return longDate(addDays(d,15));
+  if (j.terms === "net30") return longDate(addDays(d,30));
+  return "On receipt";
+}
+
 function openInvoice(id){
   const j0 = Store.jobs[id]; if (!j0) return;
-  const j = JSON.parse(JSON.stringify(j0)); j.parts = j.parts || [];
   const s = Store.settings;
+  const j = JSON.parse(JSON.stringify(j0));
+  j.items = JSON.parse(JSON.stringify(getItems(j0)));
+  if (!j.invDate) j.invDate = j.doneOn || todayStr();
+  if (!j.terms) j.terms = s.terms || "receipt";
+  if (j.invNote == null) j.invNote = s.invNote || "";
+  let mode = "edit";
+
+  const itemRow = (it,i) => { const K = ITEM_KIND[it.kind] || ITEM_KIND.other; return `<div class="item">
+      <div class="ihead"><span class="itag" style="background:${K.bg};color:${K.fg}">${K.label}</span><input data-i="${i}" data-f="desc" value="${esc(it.desc)}" placeholder="What was done / part name" aria-label="Item description"><button type="button" class="irm" data-rm="${i}" aria-label="Remove item">✕</button></div>
+      <div class="irow"><label>${it.kind==="labor"?"Hours":"Qty"}<input data-i="${i}" data-f="qty" inputmode="decimal" value="${esc(it.qty)}" placeholder="1"></label><label>${it.kind==="labor"?"Rate":"Price"}<input data-i="${i}" data-f="price" inputmode="decimal" value="${esc(it.price)}" placeholder="$0"></label><span class="ltot" id="lt${i}">${money(qtyOf(it)*num(it.price))}</span></div>
+    </div>`; };
+
   const draw = () => {
-    openSheet(`Bill${j.invNo?" #"+j.invNo:""}`, `
-      <div class="card" style="margin-top:12px"><b style="font-size:18px">${esc(j.name)}</b><div class="hint" style="margin:2px 0 0">${esc(j.address)}</div>${j.problem?`<div style="margin-top:4px">${esc(j.problem)}</div>`:""}</div>
-      <div class="sheet-h">Parts</div>
-      <div id="parts">${j.parts.map((p,i)=>`<div class="part"><input data-pi="${i}" data-pk="name" placeholder="Part" value="${esc(p.name)}" aria-label="Part name"><input data-pi="${i}" data-pk="price" inputmode="decimal" placeholder="$0" value="${esc(p.price)}" aria-label="Part price"><button type="button" data-rm="${i}" aria-label="Remove part">✕</button></div>`).join("")}</div>
-      <button class="btn ghost small" id="addPart">+ Add part</button>
-      <div class="sheet-h">Labor</div>
-      <div class="grid2"><div><label for="hours" style="margin-top:0">Hours</label><input id="hours" inputmode="decimal" value="${esc(j.hours)}" placeholder="0"></div><div><label for="rate" style="margin-top:0">Rate per hour</label><input id="rate" inputmode="decimal" value="${esc(j.rate ?? "")}" placeholder="${esc(s.rate)}"></div></div>
-      <div class="card" style="margin-top:16px" id="totals"></div>
-      <div class="btns">
-        <button class="btn accent" id="invSave">Save bill</button>
-        <button class="btn" id="invCopy">Copy bill to text or email</button>
-        ${j.status!=="paid"?`<button class="btn green" id="invPaid">Mark paid</button>`:`<button class="btn ghost" id="invUnpaid">Mark not paid</button>`}
-        <button class="btn ghost" id="invJob">Back to job details</button>
-      </div>`);
-    drawTotals();
-    $("#parts").addEventListener("input", e => { const el = e.target; if (el.dataset.pi==null) return; j.parts[+el.dataset.pi][el.dataset.pk] = el.value; drawTotals(); });
-    $("#parts").addEventListener("click", e => { const b = e.target.closest("[data-rm]"); if(!b) return; j.parts.splice(+b.dataset.rm,1); draw(); });
-    $("#addPart").onclick = () => { j.parts.push({name:"",price:""}); draw(); const ins = document.querySelectorAll('#parts input[data-pk="name"]'); ins[ins.length-1]?.focus(); };
-    $("#hours").oninput = e => { j.hours = e.target.value; drawTotals(); };
-    $("#rate").oninput = e => { j.rate = e.target.value === "" ? null : e.target.value; drawTotals(); };
+    const title = `Bill${j.invNo?" #"+j.invNo:""} · ${j.name||""}`;
+    const tabs = `<div class="seg2"><button type="button" data-view="edit" class="${mode==="edit"?"on":""}">Edit</button><button type="button" data-view="preview" class="${mode==="preview"?"on":""}">Preview</button></div>`;
+    const actions = `<div class="btns">
+        <button class="btn accent" type="button" id="invSend">${isNativeApp()?"Send as PDF":"Download PDF"}</button>
+        <div class="btns two" style="margin-top:0"><button class="btn ghost" type="button" id="invCopy">Copy as text</button>${j.status!=="paid"?`<button class="btn green" type="button" id="invPaid">Mark paid</button>`:`<button class="btn ghost" type="button" id="invUnpaid">Not paid</button>`}</div>
+        <div class="btns two" style="margin-top:0"><button class="btn ghost" type="button" id="invSave">Save</button><button class="btn ghost" type="button" id="invJob">Job details</button></div>
+      </div>`;
+    if (mode === "preview"){
+      openSheet(title, tabs + `<div class="paper-wrap">${invoiceHTML(j)}</div>` + actions);
+    } else {
+      const quick = (s.quickItems||[]).map((q,i)=>`<button type="button" class="qchip" data-quick="${i}">+ ${esc(q.desc)} <b>${money0(q.price)}</b></button>`).join("");
+      openSheet(title, tabs + `
+        <div class="sheet-h">Bill to</div>
+        <input id="i-name" value="${esc(j.name)}" placeholder="Customer name" aria-label="Customer name">
+        <input id="i-addr" value="${esc(j.address)}" placeholder="Address" aria-label="Address" style="margin-top:8px">
+        <div class="grid2" style="margin-top:8px"><input id="i-phone" type="tel" value="${esc(j.phone)}" placeholder="Phone" aria-label="Phone"><input id="i-email" type="email" value="${esc(j.email||"")}" placeholder="Email" aria-label="Email"></div>
+        <div class="sheet-h">Bill details</div>
+        <div class="grid3"><div><label for="i-no" style="margin-top:0">Bill #</label><input id="i-no" inputmode="numeric" value="${esc(j.invNo||"")}" placeholder="${esc(s.nextInv)}"></div><div><label for="i-date" style="margin-top:0">Date</label><input id="i-date" type="date" value="${esc(j.invDate)}"></div><div><label for="i-terms" style="margin-top:0">Due</label><select id="i-terms">${Object.entries(TERMS).map(([k,l])=>`<option value="${k}" ${j.terms===k?"selected":""}>${l}</option>`).join("")}</select></div></div>
+        <div class="sheet-h">Items</div>
+        <div id="items">${j.items.length ? j.items.map(itemRow).join("") : `<div class="hint" style="margin:0 0 8px">No items yet — add labor, parts or a quick item below.</div>`}</div>
+        <div class="qadd">
+          <button type="button" class="qchip" data-add="labor">+ Labor</button>
+          <button type="button" class="qchip" data-add="part">+ Part</button>
+          ${quick}
+          <button type="button" class="qchip" data-add="other">+ Other</button>
+        </div>
+        ${!(s.quickItems||[]).length?`<p class="hint">Tip: add your usual prices (service call, tune-up…) in Settings and they show up here as one-tap buttons.</p>`:""}
+        <div class="sheet-h">Adjustments</div>
+        <div class="grid3"><div><label for="i-disc" style="margin-top:0">Discount $</label><input id="i-disc" inputmode="decimal" value="${esc(j.discount||"")}" placeholder="0"></div><div><label for="i-tax" style="margin-top:0">Tax %</label><input id="i-tax" inputmode="decimal" value="${esc(j.taxPct ?? "")}" placeholder="${esc(s.taxPct||0)}"></div><div><label for="i-dep" style="margin-top:0">Paid already</label><input id="i-dep" inputmode="decimal" value="${esc(j.deposit||"")}" placeholder="$0"></div></div>
+        <label for="i-note">Note on the bill</label><textarea id="i-note" placeholder="Warranty, thank you, how to pay…">${esc(j.invNote)}</textarea>
+        <div class="card" style="margin-top:14px" id="totals"></div>` + actions);
+      drawTotals();
+      const body = $("#sheetBody");
+      body.querySelectorAll("#items input").forEach(el => el.addEventListener("input", () => {
+        const i = +el.dataset.i; j.items[i][el.dataset.f] = el.value;
+        const lt = $("#lt"+i); if (lt) lt.textContent = money(qtyOf(j.items[i])*num(j.items[i].price));
+        drawTotals();
+      }));
+      const bindVal = (sel, fn) => { const el = $(sel); if (el) el.addEventListener("input", () => { fn(el.value); drawTotals(); }); };
+      bindVal("#i-name", v => j.name = v); bindVal("#i-addr", v => j.address = v); bindVal("#i-phone", v => j.phone = v); bindVal("#i-email", v => j.email = v);
+      bindVal("#i-no", v => j.invNo = v.trim() ? Math.round(num(v)) : ""); bindVal("#i-date", v => j.invDate = v || todayStr());
+      $("#i-terms").addEventListener("change", e => { j.terms = e.target.value; });
+      bindVal("#i-disc", v => j.discount = v); bindVal("#i-tax", v => j.taxPct = v === "" ? null : v); bindVal("#i-dep", v => j.deposit = v); bindVal("#i-note", v => j.invNote = v);
+    }
+    bindCommon();
+  };
+  const drawTotals = () => {
+    const el = $("#totals"); if (!el) return;
+    const t = invoiceTotals(j);
+    el.innerHTML = `<div class="inv-line"><span>Subtotal</span><span>${money(t.sub)}</span></div>
+      ${t.discount?`<div class="inv-line"><span>Discount</span><span>−${money(t.discount)}</span></div>`:""}
+      ${t.taxPct?`<div class="inv-line"><span>Tax ${t.taxPct}%</span><span>${money(t.tax)}</span></div>`:""}
+      <div class="inv-total"><span>Total</span><span>${money(t.total)}</span></div>
+      ${t.paidAmt?`<div class="inv-line" style="color:#22663f"><span>Paid</span><span>−${money(t.paidAmt)}</span></div><div class="inv-line" style="color:var(--ink);font-weight:800"><span>Balance due</span><span>${money(t.due)}</span></div>`:""}`;
+  };
+  const bindCommon = () => {
+    const body = $("#sheetBody");
+    body.querySelectorAll("[data-view]").forEach(b => b.onclick = () => { mode = b.dataset.view; draw(); });
+    body.querySelectorAll("[data-rm]").forEach(b => b.onclick = () => { j.items.splice(+b.dataset.rm,1); draw(); });
+    body.querySelectorAll("[data-add]").forEach(b => b.onclick = () => {
+      const k = b.dataset.add;
+      j.items.push(k==="labor" ? {kind:"labor", desc:"Labor", qty:"1", price:String(num(s.rate))} : {kind:k, desc:"", qty:"1", price:""});
+      draw(); focusLast(k==="labor" ? "qty" : "desc");
+    });
+    body.querySelectorAll("[data-quick]").forEach(b => b.onclick = () => {
+      const q = (s.quickItems||[])[+b.dataset.quick]; if (!q) return;
+      j.items.push({kind:"service", desc:q.desc, qty:"1", price:String(q.price)}); draw(); toast(`Added ${q.desc}`);
+    });
     $("#invSave").onclick = () => { save(); toast("Bill saved"); };
     $("#invCopy").onclick = () => { save(); showCopy("Bill text", invoiceText(j)); };
+    $("#invSend").onclick = () => { save(); sendPdf(j); };
     const p = $("#invPaid"); if (p) p.onclick = () => { j.status="paid"; j.paidOn=todayStr(); save(); closeSheet(); toast("Marked paid"); };
     const u = $("#invUnpaid"); if (u) u.onclick = () => { j.status="done"; j.paidOn=""; save(); draw(); };
     $("#invJob").onclick = () => { save(); openJob(j.id); };
   };
-  const drawTotals = () => {
-    const t = invoiceTotals(j);
-    $("#totals").innerHTML = `<div class="inv-line"><span>Parts</span><span>${money(t.parts)}</span></div>
-      <div class="inv-line"><span>Labor (${num(j.hours)} hr × ${money(t.rate)})</span><span>${money(t.labor)}</span></div>
-      ${t.taxPct?`<div class="inv-line"><span>Tax ${t.taxPct}%</span><span>${money(t.tax)}</span></div>`:""}
-      <div class="inv-total"><span>Total</span><span>${money(t.total)}</span></div>`;
-  };
+  const focusLast = f => { const ins = document.querySelectorAll(`#items input[data-f="${f}"]`); const el = ins[ins.length-1]; if (el){ el.focus(); el.select && el.select(); } };
   const save = () => {
-    j.parts = j.parts.filter(p => (p.name||"").trim() || num(p.price));
-    if (!j.invNo){ j.invNo = num(Store.settings.nextInv) || 1001; Store.saveSettings({nextInv: j.invNo + 1}); }
+    j.items = j.items.filter(it => (it.desc||"").trim() || num(it.price));
+    delete j.parts; delete j.hours; delete j.rate;
+    if (!j.invNo){ j.invNo = num(Store.settings.nextInv) || 1001; }
+    if (num(j.invNo) >= num(Store.settings.nextInv)) Store.saveSettings({nextInv: num(j.invNo) + 1});
     if (j.status === "new" || j.status === "scheduled") j.status = "done";
     if (j.status === "done" && !j.doneOn) j.doneOn = todayStr();
     Store.saveJob(j);
-    $("#sheetTitle").textContent = "Bill #" + j.invNo;
+    $("#sheetTitle").textContent = `Bill #${j.invNo} · ${j.name||""}`;
+    const no = $("#i-no"); if (no && !no.value) no.value = j.invNo;
   };
   draw();
+}
+
+function invoiceHTML(j){
+  const s = Store.settings, t = invoiceTotals(j);
+  return `<div class="paper">
+    <div class="pbar"></div>
+    <div class="phead">
+      <div><div class="pbiz">${esc(s.business||"Your Business")}</div>
+        <div class="pmut">${[s.address, [s.phone,s.email].filter(Boolean).join(" · "), s.license?"License # "+s.license:""].filter(Boolean).map(esc).join("<br>")}</div></div>
+      <div class="pright"><div class="ptitle">INVOICE</div>
+        <table class="pmeta"><tr><td>Invoice #</td><td>${esc(j.invNo||"—")}</td></tr><tr><td>Date</td><td>${longDate(j.invDate)}</td></tr><tr><td>Due</td><td>${dueLabel(j)}</td></tr></table></div>
+    </div>
+    <div class="pcols">
+      <div><div class="plab">Bill to</div><b>${esc(j.name)}</b><div class="pmut">${[j.address,j.phone,j.email].filter(Boolean).map(esc).join("<br>")}</div></div>
+      <div><div class="plab">Job</div><b>${KIND[kindOf(j)].label}${j.doneOn?" — "+longDate(j.doneOn):""}</b><div class="pmut">${esc(j.problem||"")}${j.worker?"<br>Technician: "+esc(j.worker):""}</div></div>
+    </div>
+    <table class="pitems"><thead><tr><th>Description</th><th>Qty</th><th>Price</th><th>Amount</th></tr></thead>
+      <tbody>${t.items.length ? t.items.map(it=>`<tr><td>${esc(it.desc||"")}</td><td>${fmtQty(qtyOf(it))}</td><td>${money(it.price)}</td><td>${money(qtyOf(it)*num(it.price))}</td></tr>`).join("") : `<tr><td colspan="4" class="pmut">No items yet</td></tr>`}</tbody></table>
+    <div class="ptot">
+      <div><span>Subtotal</span><span>${money(t.sub)}</span></div>
+      ${t.discount?`<div><span>Discount</span><span>−${money(t.discount)}</span></div>`:""}
+      ${t.taxPct?`<div><span>Tax (${t.taxPct}%)</span><span>${money(t.tax)}</span></div>`:""}
+      <div class="big"><span>Total</span><span>${money(t.total)}</span></div>
+      ${t.paidAmt?`<div style="color:#22663f"><span>Paid</span><span>−${money(t.paidAmt)}</span></div>`:""}
+      <div class="due" style="background:${t.due?"#b04c12":"#22663f"}"><span>${t.due?"Balance due":"Paid in full"}</span><span>${money(t.due)}</span></div>
+    </div>
+    ${j.invNote?`<div class="plab" style="margin-top:18px">Notes</div><div class="pnote">${esc(j.invNote)}</div>`:""}
+  </div>`;
+}
+
+function makePdf(j){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:"pt", format:"letter"});
+  const s = Store.settings, t = invoiceTotals(j), W = 612, M = 44;
+  const ink=[29,36,48], mut=[95,102,114], acc=[176,76,18], grn=[34,102,63];
+  const C = c => doc.setTextColor(c[0],c[1],c[2]);
+  const F = (w,sz) => { doc.setFont("helvetica", w); doc.setFontSize(sz); };
+  const clean = v => String(v ?? "").replace(/[\u2014\u2013]/g,"-").replace(/\u2212/g,"-");
+  let y = 60;
+  doc.setFillColor(acc[0],acc[1],acc[2]); doc.rect(0,0,W,8,"F");
+  F("bold",20); C(ink); doc.text(clean(s.business||"Invoice"), M, y);
+  F("normal",10); C(mut);
+  let hy = y+17; [s.address, [s.phone,s.email].filter(Boolean).join("   |   "), s.license?"License # "+s.license:""].filter(Boolean).forEach(l => { doc.text(clean(l), M, hy); hy += 13; });
+  F("bold",26); C(acc); doc.text("INVOICE", W-M, y, {align:"right"});
+  let my = y+20;
+  [["Invoice #", j.invNo||""],["Date", longDate(j.invDate)],["Due", dueLabel(j)]].forEach(([k,v]) => { F("normal",10); C(mut); doc.text(k, W-M-120, my); F("bold",10); C(ink); doc.text(clean(v), W-M, my, {align:"right"}); my += 14; });
+  y = Math.max(hy, my) + 14;
+  doc.setDrawColor(231,225,214); doc.setLineWidth(1); doc.line(M,y,W-M,y); y += 24;
+  F("bold",9); C(mut); doc.text("BILL TO", M, y); doc.text("JOB", W/2+10, y); y += 15;
+  F("bold",11); C(ink); doc.text(clean(j.name), M, y);
+  F("normal",10);
+  let by = y+14; [j.address, j.phone, j.email].filter(Boolean).forEach(l => { doc.text(clean(l), M, by); by += 13; });
+  let jy = y; F("bold",11); doc.text(clean(KIND[kindOf(j)].label + (j.doneOn ? " - " + longDate(j.doneOn) : "")), W/2+10, jy); jy += 14;
+  F("normal",10);
+  if (j.problem) doc.splitTextToSize(clean(j.problem), W/2-M-10).forEach(l => { doc.text(l, W/2+10, jy); jy += 13; });
+  if (j.worker){ C(mut); doc.text("Technician: "+clean(j.worker), W/2+10, jy); jy += 13; C(ink); }
+  y = Math.max(by, jy) + 18;
+  const cx = {desc:M+12, qty:W-M-200, price:W-M-105, amt:W-M-12};
+  const header = () => { doc.setFillColor(ink[0],ink[1],ink[2]); doc.roundedRect(M,y,W-2*M,26,4,4,"F"); F("bold",9); doc.setTextColor(255,255,255);
+    doc.text("DESCRIPTION",cx.desc,y+17); doc.text("QTY",cx.qty,y+17,{align:"right"}); doc.text("PRICE",cx.price,y+17,{align:"right"}); doc.text("AMOUNT",cx.amt,y+17,{align:"right"}); y += 26; };
+  header();
+  t.items.forEach((it,i) => {
+    F("normal",10);
+    const lines = doc.splitTextToSize(clean(it.desc||""), cx.qty-cx.desc-50);
+    const h = Math.max(1, lines.length)*13 + 13;
+    if (y + h > 690){ doc.addPage(); y = 60; header(); F("normal",10); }
+    if (i % 2 === 1){ doc.setFillColor(248,246,242); doc.rect(M,y,W-2*M,h,"F"); }
+    C(ink); lines.forEach((l,k) => doc.text(l, cx.desc, y+17+k*13));
+    const q = qtyOf(it);
+    doc.text(fmtQty(q), cx.qty, y+17, {align:"right"}); doc.text(money(it.price), cx.price, y+17, {align:"right"}); doc.text(money(q*num(it.price)), cx.amt, y+17, {align:"right"});
+    y += h;
+  });
+  doc.setDrawColor(231,225,214); doc.line(M,y,W-M,y); y += 22;
+  if (y > 620){ doc.addPage(); y = 60; }
+  const totTop = y;
+  const row = (k,v,bold,col) => { F(bold?"bold":"normal", bold?12:10); C(col||ink); doc.text(k, W-M-180, y); doc.text(v, W-M-12, y, {align:"right"}); y += bold?20:16; };
+  row("Subtotal", money(t.sub));
+  if (t.discount) row("Discount", "-"+money(t.discount));
+  if (t.taxPct) row(`Tax (${t.taxPct}%)`, money(t.tax));
+  row("Total", money(t.total), true);
+  if (t.paidAmt) row("Paid", "-"+money(t.paidAmt), false, grn);
+  const bc = t.due ? acc : grn;
+  doc.setFillColor(bc[0],bc[1],bc[2]); doc.roundedRect(W-M-196, y-6, 196, 34, 6, 6, "F");
+  F("bold",12); doc.setTextColor(255,255,255); doc.text(t.due ? "Balance due" : "Paid in full", W-M-182, y+15); doc.text(money(t.due), W-M-12, y+15, {align:"right"});
+  if (j.status === "paid"){ F("bold",38); C(grn); doc.text("PAID", M+30, totTop+50, {angle:12}); if (j.paidOn){ F("normal",10); doc.text("on "+longDate(j.paidOn), M+38, totTop+70, {angle:12}); } }
+  let ny = y + 64;
+  if (j.invNote){
+    F("bold",9); C(mut); doc.text("NOTES", M, ny); ny += 15; F("normal",10); C(ink);
+    doc.splitTextToSize(clean(j.invNote), W-2*M).forEach(l => { if (ny > 740){ doc.addPage(); ny = 60; } doc.text(l, M, ny); ny += 13; });
+  }
+  const pages = doc.getNumberOfPages();
+  for (let pg = 1; pg <= pages; pg++){ doc.setPage(pg); F("normal",9); C(mut); doc.text(clean(`${s.business||""}${s.phone?"   |   "+s.phone:""}${pages>1?`   |   Page ${pg} of ${pages}`:""}`), W/2, 768, {align:"center"}); }
+  return doc;
+}
+
+async function sendPdf(j){
+  if (!window.jspdf){ toast("PDF maker didn't load — try again"); return; }
+  const s = Store.settings, t = invoiceTotals(j);
+  const safe = String(j.name||"customer").replace(/[^a-z0-9]+/gi,"-").replace(/^-|-$/g,"") || "customer";
+  const file = `Invoice-${j.invNo}-${safe}.pdf`;
+  let doc;
+  try { doc = makePdf(j); } catch(e){ toast("Couldn't make the PDF"); return; }
+  const P = window.Capacitor && window.Capacitor.Plugins;
+  if (isNativeApp() && P && P.Filesystem && P.Share){
+    try {
+      const data = doc.output("datauristring").split(",")[1];
+      const res = await P.Filesystem.writeFile({path:file, data, directory:"CACHE"});
+      await P.Share.share({title:`Invoice #${j.invNo}`, text:`Invoice #${j.invNo} from ${s.business||"us"} — ${money(t.due||t.total)}${t.due?" due "+dueLabel(j).toLowerCase():""}. Thank you!`, url:res.uri, dialogTitle:"Send invoice"});
+    } catch(e){ if (!/cancel/i.test(String(e && (e.message||e)))) toast("Couldn't open sharing — try Copy as text"); }
+    return;
+  }
+  try { doc.save(file); toast("PDF downloaded"); } catch(e){ toast("Couldn't download — try Copy as text"); }
 }
 
 function invoiceText(j){
   const s = Store.settings, t = invoiceTotals(j);
   const L = [];
   L.push(`INVOICE #${j.invNo}${s.business?" — "+s.business:""}`);
-  L.push(`Date: ${parseDay(j.doneOn||todayStr()).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})}`);
+  L.push(`Date: ${longDate(j.invDate||todayStr())}   Due: ${dueLabel(j)}`);
   L.push("");
   L.push(`Bill to: ${j.name}`); if (j.address) L.push(j.address);
   if (j.problem){ L.push(""); L.push(`Work: ${j.problem}`); }
   L.push("");
-  if (j.parts.length){ L.push("Parts:"); j.parts.forEach(p => L.push(`  • ${p.name||"Part"} — ${money(p.price)}`)); }
-  if (num(j.hours)) L.push(`Labor: ${num(j.hours)} hr × ${money(t.rate)} = ${money(t.labor)}`);
+  t.items.forEach(it => { const q = qtyOf(it); L.push(`• ${it.desc||"Item"}${q!==1?` (${fmtQty(q)} × ${money(it.price)})`:""} — ${money(q*num(it.price))}`); });
+  L.push("");
+  L.push(`Subtotal: ${money(t.sub)}`);
+  if (t.discount) L.push(`Discount: −${money(t.discount)}`);
   if (t.taxPct) L.push(`Tax (${t.taxPct}%): ${money(t.tax)}`);
   L.push(`TOTAL: ${money(t.total)}`);
-  if (j.status === "paid") L.push(`PAID ${fmtDay(j.paidOn)} — thank you!`);
-  L.push("");
-  L.push("Thank you for your business!");
-  const contact = [s.phone, s.email].filter(Boolean).join(" · "); if (contact) L.push(contact);
+  if (t.paidAmt) L.push(`Paid: −${money(t.paidAmt)}`);
+  L.push(t.due ? `BALANCE DUE: ${money(t.due)}` : `PAID IN FULL — thank you!`);
+  if (j.invNote){ L.push(""); L.push(j.invNote); }
+  const contact = [s.business, s.phone, s.email].filter(Boolean).join(" · "); if (contact){ L.push(""); L.push(contact); }
   return L.join("\n");
 }
 
@@ -646,11 +881,16 @@ function openSettings(){
   openSheet("Settings", `
     <form id="setForm">
       <label for="s-biz">Business name (shows on bills)</label><input id="s-biz" name="business" value="${esc(s.business)}">
+      <label for="s-addr">Business address</label><input id="s-addr" name="address" value="${esc(s.address||"")}">
       <label for="s-phone">Business phone</label><input id="s-phone" name="phone" type="tel" value="${esc(s.phone)}">
       <label for="s-email">Business email</label><input id="s-email" name="email" type="email" value="${esc(s.email)}">
       <label for="s-workers">Workers (one name per line)</label><textarea id="s-workers" name="workers" placeholder="Moshe&#10;Yossi">${esc(s.workers.join("\n"))}</textarea>
       <div class="grid2"><div><label for="s-rate">Labor rate / hour</label><input id="s-rate" name="rate" inputmode="decimal" value="${esc(s.rate)}"></div><div><label for="s-tax">Tax % (0 if none)</label><input id="s-tax" name="taxPct" inputmode="decimal" value="${esc(s.taxPct)}"></div></div>
-      <label for="s-inv">Next bill number</label><input id="s-inv" name="nextInv" inputmode="numeric" value="${esc(s.nextInv)}">
+      <label for="s-lic">License # (optional, shows on bills)</label><input id="s-lic" name="license" value="${esc(s.license||"")}">
+      <div class="sheet-h">Bills</div>
+      <div class="grid2"><div><label for="s-inv" style="margin-top:0">Next bill number</label><input id="s-inv" name="nextInv" inputmode="numeric" value="${esc(s.nextInv)}"></div><div><label for="s-terms" style="margin-top:0">Payment due</label><select id="s-terms" name="terms">${Object.entries(TERMS).map(([k,l])=>`<option value="${k}" ${(s.terms||"receipt")===k?"selected":""}>${l}</option>`).join("")}</select></div></div>
+      <label for="s-quick">Quick prices — one per line, like: Service call | 89</label><textarea id="s-quick" name="quickItems" placeholder="Service call | 89&#10;Furnace tune-up | 129">${esc((s.quickItems||[]).map(q=>`${q.desc} | ${q.price}`).join("\n"))}</textarea>
+      <label for="s-note">Note printed on every bill</label><textarea id="s-note" name="invNote">${esc(s.invNote ?? "")}</textarea>
       <div class="btns"><button class="btn accent" type="submit">Save settings</button></div>
       ${isNativeApp()?`<div class="sheet-h">App version</div><div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span><b>Build ${APP_BUILD}</b><br><span class="hint" id="updStatus" style="margin:0">Updates are checked when you open the app.</span></span><button class="btn ghost small" type="button" id="checkNow">Check now</button></div>`:""}
       <p class="hint">${Store.mode==="online"?"Jobs are saved online, so they're safe if the phone is lost.":"Jobs are saved on this phone only (test version)."}</p>
@@ -666,6 +906,8 @@ function openSettings(){
     e.preventDefault(); const f = new FormData(e.target);
     Store.saveSettings({
       business: f.get("business").trim(), phone: f.get("phone").trim(), email: f.get("email").trim(),
+      address: f.get("address").trim(), license: f.get("license").trim(), terms: f.get("terms"), invNote: f.get("invNote"),
+      quickItems: f.get("quickItems").split("\n").map(l => { const m = l.split("|"); return {desc:(m[0]||"").trim(), price:num(m[1]||"")}; }).filter(q => q.desc),
       workers: f.get("workers").split("\n").map(x=>x.trim()).filter(Boolean),
       rate: num(f.get("rate")), taxPct: num(f.get("taxPct")), nextInv: Math.max(1, Math.round(num(f.get("nextInv"))) || 1001)
     });
