@@ -347,7 +347,8 @@ const Store = {
     this.db = db; this.mode = "online";
     let firstJobs = false;
     const timer = setTimeout(()=>{ if(!firstJobs) banner("Can't reach your saved jobs yet. Check your signal — it will catch up on its own."); }, 10000);
-    db.collection("jobs").onSnapshot(snap => {
+    const onSnap = (ref, next, err) => db.cloud ? ref.onSnapshot({includeMetadataChanges:true}, next, err) : ref.onSnapshot(next, err);
+    onSnap(db.collection("jobs"), snap => {
       const j = {}; snap.docs.forEach(d => { j[d.id] = {...d.data(), id:d.id}; });
       if (!snap.metadata.fromCache && snap.empty && !this._uploaded){ this._uploaded = true; firstCloudUpload(db); return; }
       if (snap.metadata.fromCache && snap.empty && !this._seenServer){ this.jobs = localJobsForUpload(); try { this.settings = {...DEFAULT_SETTINGS, ...localSettingsForUpload()}; } catch(e){} Store.syncState = "offline"; render(); return; }
@@ -357,7 +358,7 @@ const Store = {
       Store.syncState = snap.metadata.hasPendingWrites ? "pending" : (snap.metadata.fromCache ? "offline" : "synced");
       render();
     }, err => { clearTimeout(timer); banner(err && err.code === "permission-denied" ? "The online database is locked (test period ended). Ask Avi to switch on the login." : "Lost connection to saved jobs. Close and reopen the app."); });
-    db.doc("settings/main").onSnapshot(snap => {
+    onSnap(db.doc("settings/main"), snap => {
       if (!snap.metadata.fromCache && !snap.exists && !this._settingsUploaded){ this._settingsUploaded = true; db.doc("settings/main").set(JSON.parse(JSON.stringify(localSettingsForUpload()))).catch(()=>{}); return; }
       if (!snap.exists) return;
       this.settings = {...DEFAULT_SETTINGS, ...snap.data()}; this.persistLocal();
