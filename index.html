@@ -230,6 +230,9 @@
   .pnote{white-space:pre-wrap}
   .pbar-out{height:12px;background:#e2e8f0;border-radius:99px;overflow:hidden}
   .pbar-in{height:100%;width:3%;background:var(--accent);border-radius:99px;transition:width .2s}
+  .deptag{display:inline-block;margin-top:6px;font-size:12px;font-weight:800;border-radius:99px;padding:4px 10px}
+  .deptag.due{background:#fff1d6;color:#8a5a00}
+  .deptag.ok{background:#dcfce7;color:#15803d}
   .switch-row{display:flex;justify-content:space-between;align-items:center;gap:12px;background:#fff;border-radius:14px;padding:12px 14px;margin:0;color:var(--ink);font-size:16px;font-weight:400}
   .switch{appearance:none;-webkit-appearance:none;width:52px;height:30px;padding:0;border:0;border-radius:99px;background:#cbd5e1;position:relative;flex-shrink:0;transition:background .15s;cursor:pointer}
   .switch::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:99px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .15s}
@@ -290,6 +293,8 @@ const KIND = {
   maint:{label:"Maintenance", color:"#6d3fd6", map:"#5b33b8", road:"#6639c7", t:"#f1ebff", t2:"#e2d6fd", d:"#5b33b8"}
 };
 const kindOf = j => KIND[j.kind] ? j.kind : "heat";
+const depTag = j => { if (!(j.status==="new"||j.status==="scheduled")) return ""; const d = depositOf(j); if (!d.on || !num(d.amount)) return "";
+  return d.status==="requested" ? `<span class="deptag due">Deposit due ${money0(d.amount)}</span>` : `<span class="deptag ok">Deposit paid ${money0(d.amount)}</span>`; };
 const kvars = k => { const K = KIND[k]; return `--c:${K.color};--t:${K.t};--t2:${K.t2};--d:${K.d}`; };
 const defaultKind = () => { const m = new Date().getMonth(); return (m >= 9 || m <= 3) ? "heat" : "cool"; };
 const telOf = p => (p||"").replace(/[^0-9+]/g,"");
@@ -486,11 +491,12 @@ function buckets(){
   const unpaid = all.filter(j => j.status==="done" && hasInvoice(j));
   const overdue = unpaid.filter(j => daysSince(j.doneOn) >= 14);
   const toBook = all.filter(j => j.status==="new" && !j.date);
+  const depDue = all.filter(j => (j.status==="new"||j.status==="scheduled") && depositOf(j).on && depositOf(j).status==="requested" && num(depositOf(j).amount) > 0);
   const owed = unpaid.reduce((a,j)=>a+invoiceTotals(j).due,0);
   const ws = weekStart();
   const billedWeek = all.filter(j => (j.status==="done"||j.status==="paid") && hasInvoice(j) && (j.doneOn||"") >= ws).reduce((a,j)=>a+invoiceTotals(j).total,0);
   const doneToday = all.filter(j => j.date === today && (j.status==="done"||j.status==="paid")).length;
-  return {todays, needBill, unpaid, overdue, toBook, owed, billedWeek, doneToday};
+  return {todays, needBill, unpaid, overdue, toBook, depDue, owed, billedWeek, doneToday};
 }
 
 /* ---------- rendering ---------- */
@@ -542,6 +548,7 @@ function viewToday(B){
         <div class="kindrow"><span class="kindlab"><span class="kic">${ICON[k]}</span>Up next · ${K.label}</span><span class="time">${j.time?fmtTime(j.time):""}</span></div>
         <button class="who" data-open="${j.id}">${esc(j.name)}</button>
         ${j.problem?`<div class="what">${esc(j.problem)}</div>`:""}
+        ${depTag(j)?`<div>${depTag(j)}</div>`:""}
         <div class="addr"><span>${esc(j.address||"")}</span>${j.worker?`<span class="tag">${esc(j.worker)}</span>`:""}</div>
         <div class="acts">
           ${tel?`<a href="tel:${esc(tel)}">${ICON.phone}Call</a>`:`<button data-open="${j.id}">${ICON.phone}Call</button>`}
@@ -561,6 +568,7 @@ function viewToday(B){
   const todo = [];
   if (B.needBill.length) todo.push({n:B.needBill.length, t:"Bills to make", s:B.needBill.map(j=>j.name).slice(0,3).join(", ")+" — finished", bg:"#ffe4e8", fg:"#b0172f", go:"bills"});
   if (B.toBook.length) todo.push({n:B.toBook.length, t:"Call to book", s:B.toBook.map(j=>j.name).slice(0,3).join(", "), bg:"#e3ecff", fg:"#1d4fc4", go:"schedule"});
+  if (B.depDue.length) todo.push({n:B.depDue.length, t:"Deposits to collect", s:B.depDue.map(j=>`${j.name} — ${money0(depositOf(j).amount)}`).slice(0,3).join(", "), bg:"#dcfce7", fg:"#15803d", go:"deposits"});
   if (B.overdue.length) todo.push({n:B.overdue.length, t:"Overdue payment", s:B.overdue.map(j=>`${j.name} — ${daysSince(j.doneOn)} days`).slice(0,2).join(", "), bg:"#fff1d6", fg:"#8a5a00", go:"bills"});
   html += `<h2 class="sec" style="margin-top:${t.length>1?36:22}px">Needs you<span class="cnt">${todo.length?todo.length+" thing"+(todo.length>1?"s":""):""}</span></h2>`;
   html += todo.length ? `<div class="list">${todo.map(x=>`<button class="li" data-go="${x.go}"><span class="num" style="background:${x.bg};color:${x.fg}">${x.n}</span><span class="mid"><b>${x.t}</b><span>${esc(x.s)}</span></span>${CHEV}</button>`).join("")}</div>`
@@ -576,6 +584,7 @@ function stackCard(j, label){
     <div class="row"><span class="nm">${esc(j.name)}</span>${j.worker?`<span class="tag">${esc(j.worker)}</span>`:""}</div>
     ${j.problem?`<div class="p">${esc(j.problem)}</div>`:""}
     ${j.address?`<div class="a">${esc(j.address)}</div>`:""}
+    ${depTag(j)}
   </button>`;
 }
 
@@ -586,16 +595,18 @@ function jobCard(j, extra){
     <span class="ktile" style="background:${KIND[k].color}">${ICON[k]}</span>
     <span class="mid"><span class="r1"><span class="nm">${esc(j.name||"(no name)")}</span><span class="pill s-${j.status}">${STATUS[j.status]}</span></span>
     ${j.problem?`<span class="p">${esc(j.problem)}</span>`:""}
-    <span class="s">${esc(j.address||"")}</span><span class="s">${when}</span></span>
+    <span class="s">${esc(j.address||"")}</span><span class="s">${when}</span>${depTag(j)?`<span>${depTag(j)}</span>`:""}</span>
   </button>`;
 }
 
 function viewJobs(){
   const all = jobsArr();
   const cnt = {open: all.filter(j=>j.status==="new"||j.status==="scheduled").length, done: all.filter(j=>j.status==="done").length};
-  const filters = {open:"Open"+(cnt.open?" · "+cnt.open:""), done:"Unpaid"+(cnt.done?" · "+cnt.done:""), paid:"Paid", all:"All"};
+  const depCount = all.filter(j => (j.status==="new"||j.status==="scheduled") && depositOf(j).on && depositOf(j).status==="requested").length;
+  const filters = {open:"Open"+(cnt.open?" · "+cnt.open:""), ...(depCount||UI.filter==="deposit"?{deposit:"Deposit due · "+depCount}:{}), done:"Unpaid"+(cnt.done?" · "+cnt.done:""), paid:"Paid", all:"All"};
   let list = all;
   if (UI.filter === "open") list = list.filter(j => j.status==="new" || j.status==="scheduled");
+  else if (UI.filter === "deposit") list = list.filter(j => (j.status==="new"||j.status==="scheduled") && depositOf(j).on && depositOf(j).status==="requested");
   else if (UI.filter !== "all") list = list.filter(j => j.status === UI.filter);
   const q = UI.q.trim().toLowerCase();
   if (q) list = all.filter(j => [j.name,j.address,j.phone,j.problem].join(" ").toLowerCase().includes(q));
@@ -658,6 +669,8 @@ function openJob(id){
   const isNew = !id;
   const tel = telOf(j.phone);
   let kind = kindOf(j);
+  const dep = depositOf(j); if (!dep.on) dep.status = "requested";
+  let depStatus = dep.status;
   openSheet(isNew ? "New job" : (j.name || "Job"), `
     <form id="jobForm" autocomplete="off">
       <label>Type of job</label>
@@ -668,6 +681,17 @@ function openJob(id){
       <label for="f-addr">Address</label><input id="f-addr" name="address" value="${esc(j.address)}">
       ${!isNew && (j.phone||j.address)?`<div class="link-row">${tel?`<a href="tel:${esc(tel)}">Call ${esc(j.phone)}</a><a href="sms:${esc(tel)}">Text</a>`:""}${j.address?`<a href="${mapUrl(j.address)}" target="_blank" rel="noopener">Directions</a>`:""}</div>`:""}
       <label for="f-prob">What's wrong / what to do</label><textarea id="f-prob" name="problem" placeholder="No heat, furnace clicking…">${esc(j.problem)}</textarea>
+      <div class="sheet-h">Deposit</div>
+      <label class="switch-row" for="f-depon"><span><b>Deposit for this job</b><br><span class="hint" style="margin:0">Turn on if the customer pays something up front</span></span><input type="checkbox" class="switch" id="f-depon" ${dep.on?"checked":""}></label>
+      <div class="card" id="f-depbox" style="margin-top:8px;display:${dep.on?"block":"none"}">
+        <div class="seg2" style="margin-top:0" id="f-depseg"><button type="button" data-fdep="requested" class="${dep.status==="requested"?"on":""}">Requested</button><button type="button" data-fdep="received" class="${dep.status==="received"?"on":""}">Paid</button></div>
+        <label for="f-depamt">Deposit amount</label><input id="f-depamt" inputmode="decimal" value="${esc(dep.amount)}" placeholder="$0">
+        <div id="f-deppaid" style="display:${dep.status==="received"?"block":"none"}">
+          <div class="grid2"><div><label for="f-depdate">Date paid</label><input id="f-depdate" type="date" value="${esc(dep.date||todayStr())}"></div><div><label for="f-depmeth">Paid by</label><select id="f-depmeth">${["",...METHODS].map(m=>`<option value="${m}" ${dep.method===m?"selected":""}>${m||"—"}</option>`).join("")}</select></div></div>
+          <label for="f-depnote">Note / check #</label><input id="f-depnote" value="${esc(dep.note)}" placeholder="Optional">
+        </div>
+        <p class="hint" id="f-dephint" style="display:${dep.status==="requested"?"block":"none"}">You'll see "Deposit due" on this job until you switch it to Paid.</p>
+      </div>
       <div class="sheet-h">When &amp; who</div>
       <div class="grid2"><div><label for="f-date" style="margin-top:0">Day</label><input id="f-date" name="date" type="date" value="${esc(j.date)}"></div><div><label for="f-time" style="margin-top:0">Time</label><input id="f-time" name="time" type="time" value="${esc(j.time)}"></div></div>
       <label for="f-worker">Worker</label><select id="f-worker" name="worker">${workerOptions(j.worker)}</select>
@@ -682,12 +706,18 @@ function openJob(id){
   let status = j.status;
   $("#kpick").addEventListener("click", e => { const b = e.target.closest("[data-k]"); if(!b) return; kind = b.dataset.k;
     $("#kpick").querySelectorAll("button").forEach(x => { const on = x===b; x.classList.toggle("on", on); x.style.background = on ? KIND[x.dataset.k].color : ""; }); });
+  $("#f-depon").addEventListener("change", e => { $("#f-depbox").style.display = e.target.checked ? "block" : "none"; });
+  $("#f-depseg").addEventListener("click", e => { const b = e.target.closest("[data-fdep]"); if (!b) return; depStatus = b.dataset.fdep;
+    $("#f-depseg").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b));
+    $("#f-deppaid").style.display = depStatus === "received" ? "block" : "none"; $("#f-dephint").style.display = depStatus === "requested" ? "block" : "none"; });
   const seg = $("#seg");
   if (seg) seg.addEventListener("click", e => { const b = e.target.closest("[data-st]"); if(!b) return; status = b.dataset.st; seg.querySelectorAll("button").forEach(x=>x.classList.toggle("on", x===b)); });
   const collect = () => {
     const f = new FormData($("#jobForm")); const out = {...j, kind};
     ["name","phone","address","problem","date","time","worker","notes"].forEach(k => out[k] = (f.get(k)||"").toString().trim());
     out.status = status;
+    out.deposit = {on: $("#f-depon").checked, status: depStatus, amount: $("#f-depamt").value.trim(),
+      date: depStatus === "received" ? ($("#f-depdate").value || todayStr()) : "", method: depStatus === "received" ? $("#f-depmeth").value : "", note: depStatus === "received" ? $("#f-depnote").value.trim() : ""};
     if (out.status === "new" && out.date) out.status = "scheduled";
     if (out.status === "done" && !out.doneOn) out.doneOn = todayStr();
     if (out.status === "paid" && !out.paidOn) out.paidOn = todayStr();
@@ -767,11 +797,11 @@ function openInvoice(id){
         <div class="sheet-h">Deposit</div>
         <label class="switch-row" for="i-depon"><span><b>Deposit</b><br><span class="hint" style="margin:0">Money taken up front, or asked for before the job</span></span><input type="checkbox" class="switch" id="i-depon" ${j.deposit.on?"checked":""}></label>
         ${j.deposit.on?`<div class="card" style="margin-top:8px">
-          <div class="seg2" style="margin-top:0"><button type="button" data-depst="received" class="${j.deposit.status==="received"?"on":""}">Received</button><button type="button" data-depst="requested" class="${j.deposit.status==="requested"?"on":""}">Requested</button></div>
+          <div class="seg2" style="margin-top:0"><button type="button" data-depst="requested" class="${j.deposit.status==="requested"?"on":""}">Requested</button><button type="button" data-depst="received" class="${j.deposit.status==="received"?"on":""}">Paid</button></div>
           <label for="i-depamt">Deposit amount</label><input id="i-depamt" inputmode="decimal" value="${esc(j.deposit.amount)}" placeholder="$0">
           <div class="mchips" style="margin-top:8px">${[25,50].map(pc=>`<button type="button" class="mchip" data-deppct="${pc}">${pc}% of total</button>`).join("")}</div>
           ${j.deposit.status==="received"?`<div class="grid2"><div><label for="i-depdate">Date received</label><input id="i-depdate" type="date" value="${esc(j.deposit.date||todayStr())}"></div><div><label for="i-depmeth">Paid by</label><select id="i-depmeth">${["",...METHODS].map(m=>`<option value="${m}" ${j.deposit.method===m?"selected":""}>${m||"—"}</option>`).join("")}</select></div></div>
-          <label for="i-depnote">Note / check #</label><input id="i-depnote" value="${esc(j.deposit.note)}" placeholder="Optional">`:`<p class="hint">Shows on the bill as "Deposit requested". It counts as paid once you switch it to Received.</p>`}
+          <label for="i-depnote">Note / check #</label><input id="i-depnote" value="${esc(j.deposit.note)}" placeholder="Optional">`:`<p class="hint">Shows on the bill as "Deposit requested". It counts as paid once you switch it to Paid.</p>`}
         </div>`:""}
         ${(j.payments||[]).length?`<div class="sheet-h">Payments received</div><div class="list">${j.payments.map(p=>`<div class="li"><span class="mid"><b>${money(p.amount)} · ${esc(p.method||"—")}</b><span>${p.date?longDate(p.date):""}${p.note?" · "+esc(p.note):""}</span></span></div>`).join("")}</div>`:""}
         <label for="i-note">Note on the bill</label><textarea id="i-note" placeholder="Warranty, thank you, how to pay…">${esc(j.invNote)}</textarea>
@@ -1109,6 +1139,7 @@ $("#view").addEventListener("click", e => {
     if (x==="settings") return openSettings();
     if (x==="new") return openJob(null);
     if (x==="search"){ UI.q=""; UI._refocus=true; goTab("jobs"); return; }
+    if (x==="deposits"){ UI.filter="deposit"; UI.q=""; goTab("jobs"); return; }
     goTab(x); return;
   }
   if (f){ UI.filter = f.dataset.filter; render(); return; }
