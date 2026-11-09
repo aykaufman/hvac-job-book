@@ -682,15 +682,15 @@ function openJob(id){
       ${!isNew && (j.phone||j.address)?`<div class="link-row">${tel?`<a href="tel:${esc(tel)}">Call ${esc(j.phone)}</a><a href="sms:${esc(tel)}">Text</a>`:""}${j.address?`<a href="${mapUrl(j.address)}" target="_blank" rel="noopener">Directions</a>`:""}</div>`:""}
       <label for="f-prob">What's wrong / what to do</label><textarea id="f-prob" name="problem" placeholder="No heat, furnace clicking…">${esc(j.problem)}</textarea>
       <div class="sheet-h">Deposit</div>
-      <label class="switch-row" for="f-depon"><span><b>Deposit for this job</b><br><span class="hint" style="margin:0">Turn on if the customer pays something up front</span></span><input type="checkbox" class="switch" id="f-depon" ${dep.on?"checked":""}></label>
+      <label class="switch-row" for="f-depon"><span><b>Deposit required</b></span><input type="checkbox" class="switch" id="f-depon" ${dep.on?"checked":""}></label>
       <div class="card" id="f-depbox" style="margin-top:8px;display:${dep.on?"block":"none"}">
-        <div class="seg2" style="margin-top:0" id="f-depseg"><button type="button" data-fdep="requested" class="${dep.status==="requested"?"on":""}">Requested</button><button type="button" data-fdep="received" class="${dep.status==="received"?"on":""}">Paid</button></div>
+        <div class="seg2" style="margin-top:0" id="f-depseg"><button type="button" data-fdep="requested" class="${dep.status==="requested"?"on":""}">Not paid yet</button><button type="button" data-fdep="received" class="${dep.status==="received"?"on":""}">Paid</button></div>
         <label for="f-depamt">Deposit amount</label><input id="f-depamt" inputmode="decimal" value="${esc(dep.amount)}" placeholder="$0">
         <div id="f-deppaid" style="display:${dep.status==="received"?"block":"none"}">
           <div class="grid2"><div><label for="f-depdate">Date paid</label><input id="f-depdate" type="date" value="${esc(dep.date||todayStr())}"></div><div><label for="f-depmeth">Paid by</label><select id="f-depmeth">${["",...METHODS].map(m=>`<option value="${m}" ${dep.method===m?"selected":""}>${m||"—"}</option>`).join("")}</select></div></div>
           <label for="f-depnote">Note / check #</label><input id="f-depnote" value="${esc(dep.note)}" placeholder="Optional">
         </div>
-        <p class="hint" id="f-dephint" style="display:${dep.status==="requested"?"block":"none"}">You'll see "Deposit due" on this job until you switch it to Paid.</p>
+        <p class="hint" id="f-dephint" style="display:${dep.status==="requested"?"block":"none"}">This job shows "Deposit due" until you switch it to Paid.</p>
       </div>
       <div class="sheet-h">When &amp; who</div>
       <div class="grid2"><div><label for="f-date" style="margin-top:0">Day</label><input id="f-date" name="date" type="date" value="${esc(j.date)}"></div><div><label for="f-time" style="margin-top:0">Time</label><input id="f-time" name="time" type="time" value="${esc(j.time)}"></div></div>
@@ -795,13 +795,13 @@ function openInvoice(id){
         <div class="sheet-h">Adjustments</div>
         <div class="grid2"><div><label for="i-disc" style="margin-top:0">Discount $</label><input id="i-disc" inputmode="decimal" value="${esc(j.discount||"")}" placeholder="0"></div><div><label for="i-tax" style="margin-top:0">Tax %</label><input id="i-tax" inputmode="decimal" value="${esc(j.taxPct ?? "")}" placeholder="${esc(s.taxPct||0)}"></div></div>
         <div class="sheet-h">Deposit</div>
-        <label class="switch-row" for="i-depon"><span><b>Deposit</b><br><span class="hint" style="margin:0">Money taken up front, or asked for before the job</span></span><input type="checkbox" class="switch" id="i-depon" ${j.deposit.on?"checked":""}></label>
+        <label class="switch-row" for="i-depon"><span><b>Deposit required</b></span><input type="checkbox" class="switch" id="i-depon" ${j.deposit.on?"checked":""}></label>
         ${j.deposit.on?`<div class="card" style="margin-top:8px">
-          <div class="seg2" style="margin-top:0"><button type="button" data-depst="requested" class="${j.deposit.status==="requested"?"on":""}">Requested</button><button type="button" data-depst="received" class="${j.deposit.status==="received"?"on":""}">Paid</button></div>
+          <div class="seg2" style="margin-top:0"><button type="button" data-depst="requested" class="${j.deposit.status==="requested"?"on":""}">Not paid yet</button><button type="button" data-depst="received" class="${j.deposit.status==="received"?"on":""}">Paid</button></div>
           <label for="i-depamt">Deposit amount</label><input id="i-depamt" inputmode="decimal" value="${esc(j.deposit.amount)}" placeholder="$0">
           <div class="mchips" style="margin-top:8px">${[25,50].map(pc=>`<button type="button" class="mchip" data-deppct="${pc}">${pc}% of total</button>`).join("")}</div>
           ${j.deposit.status==="received"?`<div class="grid2"><div><label for="i-depdate">Date received</label><input id="i-depdate" type="date" value="${esc(j.deposit.date||todayStr())}"></div><div><label for="i-depmeth">Paid by</label><select id="i-depmeth">${["",...METHODS].map(m=>`<option value="${m}" ${j.deposit.method===m?"selected":""}>${m||"—"}</option>`).join("")}</select></div></div>
-          <label for="i-depnote">Note / check #</label><input id="i-depnote" value="${esc(j.deposit.note)}" placeholder="Optional">`:`<p class="hint">Shows on the bill as "Deposit requested". It counts as paid once you switch it to Paid.</p>`}
+          <label for="i-depnote">Note / check #</label><input id="i-depnote" value="${esc(j.deposit.note)}" placeholder="Optional">`:`<p class="hint">Shows on the bill as "Deposit due". It comes off the balance once you switch it to Paid.</p>`}
         </div>`:""}
         ${(j.payments||[]).length?`<div class="sheet-h">Payments received</div><div class="list">${j.payments.map(p=>`<div class="li"><span class="mid"><b>${money(p.amount)} · ${esc(p.method||"—")}</b><span>${p.date?longDate(p.date):""}${p.note?" · "+esc(p.note):""}</span></span></div>`).join("")}</div>`:""}
         <label for="i-note">Note on the bill</label><textarea id="i-note" placeholder="Warranty, thank you, how to pay…">${esc(j.invNote)}</textarea>
@@ -834,7 +834,7 @@ function openInvoice(id){
       ${t.taxPct?`<div class="inv-line"><span>Tax ${t.taxPct}%</span><span>${money(t.tax)}</span></div>`:""}
       <div class="inv-total"><span>Total</span><span>${money(t.total)}</span></div>
       ${t.lines.map(l=>`<div class="inv-line" style="color:#15803d"><span>${esc(lineText(l))}</span><span>−${money(l.amount)}</span></div>`).join("")}
-      ${t.depositDue?`<div class="inv-line" style="color:#8a5a00"><span>Deposit requested</span><span>${money(t.depositDue)}</span></div>`:""}
+      ${t.depositDue?`<div class="inv-line" style="color:#8a5a00"><span>Deposit due</span><span>${money(t.depositDue)}</span></div>`:""}
       ${t.paidAmt||t.depositDue?`<div class="inv-line" style="color:var(--ink);font-weight:800"><span>Balance due</span><span>${money(t.due)}</span></div>`:""}`;
   };
   const bindCommon = () => {
@@ -928,7 +928,7 @@ function invoiceHTML(j){
       ${t.taxPct?`<div><span>Tax (${t.taxPct}%)</span><span>${money(t.tax)}</span></div>`:""}
       <div class="big"><span>Total</span><span>${money(t.total)}</span></div>
       ${t.lines.map(l=>`<div style="color:#15803d"><span>${esc(lineText(l))}</span><span>−${money(l.amount)}</span></div>`).join("")}
-      ${t.depositDue?`<div style="color:#8a5a00"><span>Deposit requested</span><span>${money(t.depositDue)}</span></div>`:""}
+      ${t.depositDue?`<div style="color:#8a5a00"><span>Deposit due</span><span>${money(t.depositDue)}</span></div>`:""}
       <div class="due" style="background:${paidFull(j,t)?"#15803d":"#d6203f"}"><span>${paidFull(j,t)?"Paid in full":"Balance due"}</span><span>${money(t.due)}</span></div>
     </div>
     ${j.invNote?`<div class="plab" style="margin-top:18px">Notes</div><div class="pnote">${esc(j.invNote)}</div>`:""}
@@ -986,7 +986,7 @@ function makePdf(j){
   if (t.taxPct) row(`Tax (${t.taxPct}%)`, money(t.tax));
   row("Total", money(t.total), true);
   t.lines.forEach(l => row(clean(lineText(l)).replace(/ · /g," - "), "-"+money(l.amount), false, grn));
-  if (t.depositDue) row("Deposit requested", money(t.depositDue), false, [138,90,0]);
+  if (t.depositDue) row("Deposit due", money(t.depositDue), false, [138,90,0]);
   const bc = paidFull(j,t) ? grn : acc;
   doc.setFillColor(bc[0],bc[1],bc[2]); doc.roundedRect(W-M-196, y-6, 196, 34, 6, 6, "F");
   F("bold",12); doc.setTextColor(255,255,255); doc.text(paidFull(j,t) ? "Paid in full" : "Balance due", W-M-182, y+15); doc.text(money(t.due), W-M-12, y+15, {align:"right"});
@@ -1036,7 +1036,7 @@ function invoiceText(j){
   if (t.taxPct) L.push(`Tax (${t.taxPct}%): ${money(t.tax)}`);
   L.push(`TOTAL: ${money(t.total)}`);
   t.lines.forEach(l => L.push(`${lineText(l)}: −${money(l.amount)}`));
-  if (t.depositDue) L.push(`Deposit requested: ${money(t.depositDue)}`);
+  if (t.depositDue) L.push(`Deposit due: ${money(t.depositDue)}`);
   L.push(t.due ? `BALANCE DUE: ${money(t.due)}` : `PAID IN FULL — thank you!`);
   if (j.invNote){ L.push(""); L.push(j.invNote); }
   const contact = [s.business, s.phone, s.email, s.website].filter(Boolean).join(" · "); if (contact){ L.push(""); L.push(contact); }
