@@ -230,6 +230,14 @@
   .pnote{white-space:pre-wrap}
   .pbar-out{height:12px;background:#e2e8f0;border-radius:99px;overflow:hidden}
   .pbar-in{height:100%;width:3%;background:var(--accent);border-radius:99px;transition:width .2s}
+  .switch-row{display:flex;justify-content:space-between;align-items:center;gap:12px;background:#fff;border-radius:14px;padding:12px 14px;margin:0;color:var(--ink);font-size:16px;font-weight:400}
+  .switch{appearance:none;-webkit-appearance:none;width:52px;height:30px;padding:0;border:0;border-radius:99px;background:#cbd5e1;position:relative;flex-shrink:0;transition:background .15s;cursor:pointer}
+  .switch::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:99px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .15s}
+  .switch:checked{background:#15803d}
+  .switch:checked::after{left:25px}
+  .mchips{display:flex;flex-wrap:wrap;gap:8px}
+  .mchip{border:1.5px solid #cbd5e1;background:#fff;border-radius:99px;padding:9px 14px;font-size:15px;font-weight:700;color:var(--ink)}
+  .mchip.on{background:var(--ink);border-color:var(--ink);color:#fff}
   .steps{padding-left:22px;margin:14px 0 0;font-size:17px}
   .steps li{margin-bottom:12px}
   .copybox{width:100%;min-height:240px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px}
@@ -429,8 +437,38 @@ function invoiceTotals(j){
   const taxPct = (j.taxPct != null && j.taxPct !== "") ? num(j.taxPct) : num(Store.settings.taxPct);
   const tax = Math.round((sub - discount) * taxPct) / 100;
   const total = sub - discount + tax;
-  const paidAmt = j.status === "paid" ? total : Math.min(num(j.deposit), total);
-  return {items, sub, discount, taxPct, tax, total, paidAmt, due: Math.max(0, total - paidAmt)};
+  const lines = paymentLines(j);
+  let paidAmt = lines.reduce((a,l)=>a+l.amount,0);
+  if (j.status === "paid" && !lines.length) paidAmt = total;
+  paidAmt = Math.min(paidAmt, total);
+  const dep = depositOf(j);
+  const depositDue = (dep.on && dep.status === "requested") ? num(dep.amount) : 0;
+  return {items, sub, discount, taxPct, tax, total, paidAmt, lines, depositDue, due: Math.max(0, Math.round((total - paidAmt)*100)/100)};
+}
+const METHODS = ["Cash","Check","Zelle","Card","Venmo","Other"];
+function depositOf(j){
+  const d = j.deposit;
+  if (d && typeof d === "object") return {on:!!d.on, status:d.status||"received", amount:d.amount ?? "", date:d.date||"", method:d.method||"", note:d.note||""};
+  if (num(d) > 0) return {on:true, status:"received", amount:String(d), date:"", method:"", note:""};
+  return {on:false, status:"received", amount:"", date:"", method:"", note:""};
+}
+function paymentLines(j){
+  const L = [], d = depositOf(j);
+  if (d.on && d.status === "received" && num(d.amount) > 0) L.push({label:"Deposit", amount:num(d.amount), date:d.date, method:d.method, note:d.note});
+  (j.payments||[]).forEach(p => L.push({label:"Payment", amount:num(p.amount), date:p.date, method:p.method, note:p.note, id:p.id}));
+  return L;
+}
+const lineText = l => `${l.label}${l.date?" · "+longDate(l.date):""}${l.method?" · "+l.method:""}${l.note?" ("+l.note+")":""}`;
+function syncPaid(j){
+  const lines = paymentLines(j);
+  if (!lines.length) return j;
+  const t = invoiceTotals({...j, status: j.status === "paid" ? "done" : j.status});
+  if (t.total > 0 && t.due <= 0.004){
+    j.status = "paid";
+    j.paidOn = lines.map(l => l.date).filter(Boolean).sort().pop() || todayStr();
+    if (!j.doneOn) j.doneOn = todayStr();
+  } else if (j.status === "paid"){ j.status = "done"; j.paidOn = ""; }
+  return j;
 }
 const paidFull = (j,t) => j.status === "paid" || (t.total > 0 && t.due === 0);
 const hasInvoice = j => getItems(j).some(it => num(it.price) || (it.desc||"").trim());
@@ -599,7 +637,8 @@ function viewBills(B){
     ${unpaid.length ? unpaid.map(j=>{ const d=daysSince(j.doneOn); return `<div class="card">
       <div style="display:flex;justify-content:space-between;align-items:baseline"><b style="font-size:18px">${esc(j.name)}</b><span class="money" style="font-size:18px">${money(invoiceTotals(j).due)}</span></div>
       <div class="hint" style="margin:2px 0 0">${j.invNo?"Bill #"+j.invNo+" · ":""}${d===0?"Done today":d+" day"+(d>1?"s":"")+" waiting"}${d>=14?' · <b style="color:#b0172f">overdue</b>':""}</div>
-      <div class="btns two" style="margin-top:10px"><button class="btn ghost small" data-open="${j.id}" data-mode="invoice">View bill</button><button class="btn green small" data-paid="${j.id}">Mark paid</button></div></div>`;}).join("")
+      ${invoiceTotals(j).paidAmt?`<div class="hint" style="margin:2px 0 0;color:#15803d;font-weight:700">Partly paid: ${money(invoiceTotals(j).paidAmt)} of ${money(invoiceTotals(j).total)}</div>`:""}
+      <div class="btns two" style="margin-top:10px"><button class="btn ghost small" data-open="${j.id}" data-mode="invoice">View bill</button><button class="btn green small" data-pay="${j.id}">Record payment</button></div></div>`;}).join("")
       : `<div class="empty">Nobody owes anything right now.</div>`}
     ${paid.length?`<h2 class="sec">Paid</h2><div class="list">${paid.map(j=>`<button class="li" data-open="${j.id}" data-mode="invoice"><span class="mid"><b>${esc(j.name)}</b><span>${j.invNo?"#"+j.invNo+" · ":""}paid ${j.paidOn?fmtDay(j.paidOn):""}</span></span><span class="money">${money(invoiceTotals(j).total)}</span></button>`).join("")}</div>`:""}`;
 }
@@ -687,6 +726,7 @@ function openInvoice(id){
   if (!j.invDate) j.invDate = j.doneOn || todayStr();
   if (!j.terms) j.terms = s.terms || "receipt";
   if (j.invNote == null) j.invNote = s.invNote || "";
+  j.deposit = depositOf(j);
   let mode = "edit";
 
   const itemRow = (it,i) => { const K = ITEM_KIND[it.kind] || ITEM_KIND.other; return `<div class="item">
@@ -699,7 +739,7 @@ function openInvoice(id){
     const tabs = `<div class="seg2"><button type="button" data-view="edit" class="${mode==="edit"?"on":""}">Edit</button><button type="button" data-view="preview" class="${mode==="preview"?"on":""}">Preview</button></div>`;
     const actions = `<div class="btns">
         <button class="btn accent" type="button" id="invSend">${isNativeApp()?"Send as PDF":"Download PDF"}</button>
-        <div class="btns two" style="margin-top:0"><button class="btn ghost" type="button" id="invCopy">Copy as text</button>${j.status!=="paid"?`<button class="btn green" type="button" id="invPaid">Mark paid</button>`:`<button class="btn ghost" type="button" id="invUnpaid">Not paid</button>`}</div>
+        <div class="btns two" style="margin-top:0"><button class="btn ghost" type="button" id="invCopy">Copy as text</button><button class="btn green" type="button" id="invPay">${j.status==="paid"?"Payments":"Record payment"}</button></div>
         <div class="btns two" style="margin-top:0"><button class="btn ghost" type="button" id="invSave">Save</button><button class="btn ghost" type="button" id="invJob">Job details</button></div>
       </div>`;
     if (mode === "preview"){
@@ -723,7 +763,17 @@ function openInvoice(id){
         </div>
         ${!(s.quickItems||[]).length?`<p class="hint">Tip: add your usual prices (service call, tune-up…) in Settings and they show up here as one-tap buttons.</p>`:""}
         <div class="sheet-h">Adjustments</div>
-        <div class="grid3"><div><label for="i-disc" style="margin-top:0">Discount $</label><input id="i-disc" inputmode="decimal" value="${esc(j.discount||"")}" placeholder="0"></div><div><label for="i-tax" style="margin-top:0">Tax %</label><input id="i-tax" inputmode="decimal" value="${esc(j.taxPct ?? "")}" placeholder="${esc(s.taxPct||0)}"></div><div><label for="i-dep" style="margin-top:0">Paid already</label><input id="i-dep" inputmode="decimal" value="${esc(j.deposit||"")}" placeholder="$0"></div></div>
+        <div class="grid2"><div><label for="i-disc" style="margin-top:0">Discount $</label><input id="i-disc" inputmode="decimal" value="${esc(j.discount||"")}" placeholder="0"></div><div><label for="i-tax" style="margin-top:0">Tax %</label><input id="i-tax" inputmode="decimal" value="${esc(j.taxPct ?? "")}" placeholder="${esc(s.taxPct||0)}"></div></div>
+        <div class="sheet-h">Deposit</div>
+        <label class="switch-row" for="i-depon"><span><b>Deposit</b><br><span class="hint" style="margin:0">Money taken up front, or asked for before the job</span></span><input type="checkbox" class="switch" id="i-depon" ${j.deposit.on?"checked":""}></label>
+        ${j.deposit.on?`<div class="card" style="margin-top:8px">
+          <div class="seg2" style="margin-top:0"><button type="button" data-depst="received" class="${j.deposit.status==="received"?"on":""}">Received</button><button type="button" data-depst="requested" class="${j.deposit.status==="requested"?"on":""}">Requested</button></div>
+          <label for="i-depamt">Deposit amount</label><input id="i-depamt" inputmode="decimal" value="${esc(j.deposit.amount)}" placeholder="$0">
+          <div class="mchips" style="margin-top:8px">${[25,50].map(pc=>`<button type="button" class="mchip" data-deppct="${pc}">${pc}% of total</button>`).join("")}</div>
+          ${j.deposit.status==="received"?`<div class="grid2"><div><label for="i-depdate">Date received</label><input id="i-depdate" type="date" value="${esc(j.deposit.date||todayStr())}"></div><div><label for="i-depmeth">Paid by</label><select id="i-depmeth">${["",...METHODS].map(m=>`<option value="${m}" ${j.deposit.method===m?"selected":""}>${m||"—"}</option>`).join("")}</select></div></div>
+          <label for="i-depnote">Note / check #</label><input id="i-depnote" value="${esc(j.deposit.note)}" placeholder="Optional">`:`<p class="hint">Shows on the bill as "Deposit requested". It counts as paid once you switch it to Received.</p>`}
+        </div>`:""}
+        ${(j.payments||[]).length?`<div class="sheet-h">Payments received</div><div class="list">${j.payments.map(p=>`<div class="li"><span class="mid"><b>${money(p.amount)} · ${esc(p.method||"—")}</b><span>${p.date?longDate(p.date):""}${p.note?" · "+esc(p.note):""}</span></span></div>`).join("")}</div>`:""}
         <label for="i-note">Note on the bill</label><textarea id="i-note" placeholder="Warranty, thank you, how to pay…">${esc(j.invNote)}</textarea>
         <div class="card" style="margin-top:14px" id="totals"></div>` + actions);
       drawTotals();
@@ -737,7 +787,12 @@ function openInvoice(id){
       bindVal("#i-name", v => j.name = v); bindVal("#i-addr", v => j.address = v); bindVal("#i-phone", v => j.phone = v); bindVal("#i-email", v => j.email = v);
       bindVal("#i-no", v => j.invNo = v.trim() ? Math.round(num(v)) : ""); bindVal("#i-date", v => j.invDate = v || todayStr());
       $("#i-terms").addEventListener("change", e => { j.terms = e.target.value; });
-      bindVal("#i-disc", v => j.discount = v); bindVal("#i-tax", v => j.taxPct = v === "" ? null : v); bindVal("#i-dep", v => j.deposit = v); bindVal("#i-note", v => j.invNote = v);
+      bindVal("#i-disc", v => j.discount = v); bindVal("#i-tax", v => j.taxPct = v === "" ? null : v); bindVal("#i-note", v => j.invNote = v);
+      const depOn = $("#i-depon"); if (depOn) depOn.addEventListener("change", () => { j.deposit.on = depOn.checked; if (j.deposit.on && !j.deposit.date) j.deposit.date = todayStr(); draw(); });
+      body.querySelectorAll("[data-depst]").forEach(b => b.onclick = () => { j.deposit.status = b.dataset.depst; if (j.deposit.status==="received" && !j.deposit.date) j.deposit.date = todayStr(); draw(); });
+      body.querySelectorAll("[data-deppct]").forEach(b => b.onclick = () => { const t = invoiceTotals({...j, deposit:{on:false}}); j.deposit.amount = (Math.round(t.total * num(b.dataset.deppct)) / 100).toFixed(2); const el = $("#i-depamt"); if (el) el.value = j.deposit.amount; drawTotals(); });
+      bindVal("#i-depamt", v => j.deposit.amount = v); bindVal("#i-depdate", v => j.deposit.date = v); bindVal("#i-depnote", v => j.deposit.note = v);
+      const dm = $("#i-depmeth"); if (dm) dm.addEventListener("change", () => { j.deposit.method = dm.value; drawTotals(); });
     }
     bindCommon();
   };
@@ -748,7 +803,9 @@ function openInvoice(id){
       ${t.discount?`<div class="inv-line"><span>Discount</span><span>−${money(t.discount)}</span></div>`:""}
       ${t.taxPct?`<div class="inv-line"><span>Tax ${t.taxPct}%</span><span>${money(t.tax)}</span></div>`:""}
       <div class="inv-total"><span>Total</span><span>${money(t.total)}</span></div>
-      ${t.paidAmt?`<div class="inv-line" style="color:#15803d"><span>Paid</span><span>−${money(t.paidAmt)}</span></div><div class="inv-line" style="color:var(--ink);font-weight:800"><span>Balance due</span><span>${money(t.due)}</span></div>`:""}`;
+      ${t.lines.map(l=>`<div class="inv-line" style="color:#15803d"><span>${esc(lineText(l))}</span><span>−${money(l.amount)}</span></div>`).join("")}
+      ${t.depositDue?`<div class="inv-line" style="color:#8a5a00"><span>Deposit requested</span><span>${money(t.depositDue)}</span></div>`:""}
+      ${t.paidAmt||t.depositDue?`<div class="inv-line" style="color:var(--ink);font-weight:800"><span>Balance due</span><span>${money(t.due)}</span></div>`:""}`;
   };
   const bindCommon = () => {
     const body = $("#sheetBody");
@@ -766,8 +823,7 @@ function openInvoice(id){
     $("#invSave").onclick = () => { save(); toast("Bill saved"); };
     $("#invCopy").onclick = () => { save(); showCopy("Bill text", invoiceText(j)); };
     $("#invSend").onclick = () => { save(); sendPdf(j); };
-    const p = $("#invPaid"); if (p) p.onclick = () => { j.status="paid"; j.paidOn=todayStr(); save(); closeSheet(); toast("Marked paid"); };
-    const u = $("#invUnpaid"); if (u) u.onclick = () => { j.status="done"; j.paidOn=""; save(); draw(); };
+    $("#invPay").onclick = () => { save(); openPayment(j.id, () => openInvoice(j.id)); };
     $("#invJob").onclick = () => { save(); openJob(j.id); };
   };
   const focusLast = f => { const ins = document.querySelectorAll(`#items input[data-f="${f}"]`); const el = ins[ins.length-1]; if (el){ el.focus(); el.select && el.select(); } };
@@ -778,9 +834,44 @@ function openInvoice(id){
     if (num(j.invNo) >= num(Store.settings.nextInv)) Store.saveSettings({nextInv: num(j.invNo) + 1});
     if (j.status === "new" || j.status === "scheduled") j.status = "done";
     if (j.status === "done" && !j.doneOn) j.doneOn = todayStr();
+    syncPaid(j);
     Store.saveJob(j);
     $("#sheetTitle").textContent = `Bill #${j.invNo} · ${j.name||""}`;
     const no = $("#i-no"); if (no && !no.value) no.value = j.invNo;
+  };
+  draw();
+}
+
+function openPayment(id, back){
+  if (!Store.jobs[id]) return;
+  const j = JSON.parse(JSON.stringify(Store.jobs[id]));
+  j.payments = j.payments || [];
+  let method = "Cash";
+  const draw = () => {
+    const t = invoiceTotals(j);
+    openSheet(`Payment · ${j.name||""}`, `
+      <div class="owed" style="margin-top:12px"><small>${t.due>0?"Balance due":"Paid in full"}</small><div class="amt">${money(t.due)}</div><small>Total ${money(t.total)} · Received ${money(t.paidAmt)}${j.invNo?" · Bill #"+j.invNo:""}</small></div>
+      ${t.lines.length?`<div class="sheet-h">Received</div><div class="list">${t.lines.map(l=>`<div class="li"><span class="mid"><b>${money(l.amount)}${l.method?" · "+esc(l.method):""}</b><span>${l.label}${l.date?" · "+longDate(l.date):""}${l.note?" · "+esc(l.note):""}</span></span>${l.id?`<button type="button" class="irm" data-rmpay="${l.id}" aria-label="Remove this payment">✕</button>`:""}</div>`).join("")}</div>`:""}
+      ${t.total<=0?`<div class="card hint" style="margin-top:12px">This bill has no items yet. Add items to the bill first.</div>`:t.due>0?`<div class="sheet-h">Record a payment</div>
+        <label for="p-amt" style="margin-top:0">Amount</label><input id="p-amt" inputmode="decimal" value="${t.due.toFixed(2)}">
+        <label>Paid by</label><div class="mchips">${METHODS.map(m=>`<button type="button" class="mchip ${m===method?"on":""}" data-m="${m}">${m}</button>`).join("")}</div>
+        <div class="grid2"><div><label for="p-date">Date</label><input id="p-date" type="date" value="${todayStr()}"></div><div><label for="p-note">Note / check #</label><input id="p-note" placeholder="Optional"></div></div>
+        <div class="btns"><button type="button" class="btn green" id="p-save">Save payment</button></div>
+        <p class="hint">Paid in two ways (like part cash, part check)? Save the first one, then add the second.</p>`:""}
+      <div class="btns"><button type="button" class="btn ghost" id="p-back">${back?"Back to bill":"Done"}</button></div>`);
+    const body = $("#sheetBody");
+    body.querySelectorAll("[data-m]").forEach(b => b.onclick = () => { method = b.dataset.m; body.querySelectorAll("[data-m]").forEach(x => x.classList.toggle("on", x === b)); });
+    body.querySelectorAll("[data-rmpay]").forEach(b => b.onclick = () => { j.payments = j.payments.filter(p => p.id !== b.dataset.rmpay); syncPaid(j); Store.saveJob(j); toast("Payment removed"); draw(); });
+    const sv = $("#p-save"); if (sv) sv.onclick = () => {
+      const amt = num($("#p-amt").value);
+      if (amt <= 0){ toast("Enter the amount"); return; }
+      j.payments.push({id:newId(), amount:String(Math.round(amt*100)/100), method, date:$("#p-date").value || todayStr(), note:$("#p-note").value.trim()});
+      if (j.status === "new" || j.status === "scheduled"){ j.status = "done"; if (!j.doneOn) j.doneOn = todayStr(); }
+      syncPaid(j); Store.saveJob(j);
+      toast(j.status === "paid" ? `Paid in full — ${money(amt)} ${method}` : `${money(amt)} ${method} recorded`);
+      draw();
+    };
+    $("#p-back").onclick = () => back ? back() : closeSheet();
   };
   draw();
 }
@@ -806,7 +897,8 @@ function invoiceHTML(j){
       ${t.discount?`<div><span>Discount</span><span>−${money(t.discount)}</span></div>`:""}
       ${t.taxPct?`<div><span>Tax (${t.taxPct}%)</span><span>${money(t.tax)}</span></div>`:""}
       <div class="big"><span>Total</span><span>${money(t.total)}</span></div>
-      ${t.paidAmt?`<div style="color:#15803d"><span>Paid</span><span>−${money(t.paidAmt)}</span></div>`:""}
+      ${t.lines.map(l=>`<div style="color:#15803d"><span>${esc(lineText(l))}</span><span>−${money(l.amount)}</span></div>`).join("")}
+      ${t.depositDue?`<div style="color:#8a5a00"><span>Deposit requested</span><span>${money(t.depositDue)}</span></div>`:""}
       <div class="due" style="background:${paidFull(j,t)?"#15803d":"#d6203f"}"><span>${paidFull(j,t)?"Paid in full":"Balance due"}</span><span>${money(t.due)}</span></div>
     </div>
     ${j.invNote?`<div class="plab" style="margin-top:18px">Notes</div><div class="pnote">${esc(j.invNote)}</div>`:""}
@@ -858,12 +950,13 @@ function makePdf(j){
   doc.setDrawColor(226,232,240); doc.line(M,y,W-M,y); y += 22;
   if (y > 620){ doc.addPage(); y = 60; }
   const totTop = y;
-  const row = (k,v,bold,col) => { F(bold?"bold":"normal", bold?12:10); C(col||ink); doc.text(k, W-M-180, y); doc.text(v, W-M-12, y, {align:"right"}); y += bold?20:16; };
+  const row = (k,v,bold,col) => { F(bold?"bold":"normal", bold?12:10); C(col||ink); doc.text(k, W-M-100, y, {align:"right"}); doc.text(v, W-M-12, y, {align:"right"}); y += bold?20:16; };
   row("Subtotal", money(t.sub));
   if (t.discount) row("Discount", "-"+money(t.discount));
   if (t.taxPct) row(`Tax (${t.taxPct}%)`, money(t.tax));
   row("Total", money(t.total), true);
-  if (t.paidAmt) row("Paid", "-"+money(t.paidAmt), false, grn);
+  t.lines.forEach(l => row(clean(lineText(l)).replace(/ · /g," - "), "-"+money(l.amount), false, grn));
+  if (t.depositDue) row("Deposit requested", money(t.depositDue), false, [138,90,0]);
   const bc = paidFull(j,t) ? grn : acc;
   doc.setFillColor(bc[0],bc[1],bc[2]); doc.roundedRect(W-M-196, y-6, 196, 34, 6, 6, "F");
   F("bold",12); doc.setTextColor(255,255,255); doc.text(paidFull(j,t) ? "Paid in full" : "Balance due", W-M-182, y+15); doc.text(money(t.due), W-M-12, y+15, {align:"right"});
@@ -912,7 +1005,8 @@ function invoiceText(j){
   if (t.discount) L.push(`Discount: −${money(t.discount)}`);
   if (t.taxPct) L.push(`Tax (${t.taxPct}%): ${money(t.tax)}`);
   L.push(`TOTAL: ${money(t.total)}`);
-  if (t.paidAmt) L.push(`Paid: −${money(t.paidAmt)}`);
+  t.lines.forEach(l => L.push(`${lineText(l)}: −${money(l.amount)}`));
+  if (t.depositDue) L.push(`Deposit requested: ${money(t.depositDue)}`);
   L.push(t.due ? `BALANCE DUE: ${money(t.due)}` : `PAID IN FULL — thank you!`);
   if (j.invNote){ L.push(""); L.push(j.invNote); }
   const contact = [s.business, s.phone, s.email, s.website].filter(Boolean).join(" · "); if (contact){ L.push(""); L.push(contact); }
@@ -1005,10 +1099,10 @@ $("#view").addEventListener("click", e => {
   const f = e.target.closest("[data-filter]");
   const d = e.target.closest("[data-day]");
   const t = e.target.closest("[data-text]");
-  const p = e.target.closest("[data-paid]");
+  const p = e.target.closest("[data-pay]");
   if (dn){ markDone(dn.dataset.done); return; }
   if (t){ showCopy(`Text for ${t.dataset.text}`, workerText(t.dataset.text, UI.day)); return; }
-  if (p){ const j = {...Store.jobs[p.dataset.paid], status:"paid", paidOn: todayStr()}; Store.saveJob(j); toast(`${j.name} marked paid`); return; }
+  if (p){ openPayment(p.dataset.pay); return; }
   if (o){ o.dataset.mode === "invoice" ? openInvoice(o.dataset.open) : openJob(o.dataset.open); return; }
   if (g){
     const x = g.dataset.go;
